@@ -6,6 +6,8 @@
 //  Copyright © 2017年 GDtech. All rights reserved.
 //
 
+#import <pthread.h>
+
 #ifndef Macro_h
 #define Macro_h
 
@@ -27,15 +29,15 @@
 #define NAVIGATION_ITEM_VIEW_LEFT_BACK_ITEM_IMAGE_WITH_TITLE_SPACE              (5)
 
 #define NAVIGATION_ITEM_MIN_WIDTH                                               (40)
-//这个最好别修改，NAVIGATION_ITEM_HEIGHT_WITH_NAVIGATION_BAR_HEIGHT_RATIO这个和系统中的导航栏中返回按钮一样大小
-#define NAVIGATION_ITEM_HEIGHT_WITH_NAVIGATION_BAR_HEIGHT_RATIO                 (0.5)
+//这个(0.5)最好别修改，NAVIGATION_ITEM_HEIGHT_WITH_NAVIGATION_BAR_HEIGHT_RATIO这个和系统中的导航栏中返回按钮一样大小
+#define NAVIGATION_ITEM_CONTENT_HEIGHT_WITH_NAVIGATION_BAR_HEIGHT_RATIO         (0.55)
 //这个是长方形图片导航栏按钮高度与导航栏高度的比例
-#define IMAGE_NAVIGATION_ITEM_HEIGHT_WITH_NAVIGATION_BAR_HEIGHT_RATIO           (0.8)//   (0.4)
+//#define IMAGE_NAVIGATION_ITEM_HEIGHT_WITH_NAVIGATION_BAR_HEIGHT_RATIO           (0.8)//   (0.4)
 //这个是正方形图片导航栏按钮高度与导航栏高度的比例
-#define SQUARE_IMAGE_NAVIGATION_ITEM_HEIGHT_WITH_NAVIGATION_BAR_HEIGHT_RATIO    (0.62)
-#define SQUARE_IMAGE_WIDTH_WITH_HEIGHT_MIN_RATIO                                (0.95)
-#define SQUARE_IMAGE_WIDTH_WITH_HEIGHT_MAX_RATIO                                (1.05)
-#define IS_SQUARE_SIZE(SIZE)                                                    (SIZE.width/SIZE.height >= SQUARE_IMAGE_WIDTH_WITH_HEIGHT_MIN_RATIO && SIZE.width/SIZE.height <= SQUARE_IMAGE_WIDTH_WITH_HEIGHT_MAX_RATIO)
+//#define SQUARE_IMAGE_NAVIGATION_ITEM_HEIGHT_WITH_NAVIGATION_BAR_HEIGHT_RATIO    (0.62)
+//#define SQUARE_IMAGE_WIDTH_WITH_HEIGHT_MIN_RATIO                                (0.95)
+//#define SQUARE_IMAGE_WIDTH_WITH_HEIGHT_MAX_RATIO                                (1.05)
+//#define IS_SQUARE_SIZE(SIZE)                                                    (SIZE.width/SIZE.height >= SQUARE_IMAGE_WIDTH_WITH_HEIGHT_MIN_RATIO && SIZE.width/SIZE.height <= SQUARE_IMAGE_WIDTH_WITH_HEIGHT_MAX_RATIO)
 
 #define NAVIGATION_ITEM_TITLE_FONT             [UIFont fontWithName:@"Helvetica-Bold" size:17.0]
 
@@ -82,13 +84,12 @@
 #define STATUS_BAR_ORIENTATION                 [UIApplication sharedApplication].statusBarOrientation
 #define STATUS_BAR_FRAME                       [[UIApplication sharedApplication] statusBarFrame]
 #define NAV_BAR_FRAME                          self.navigationController.navigationBar.frame
-#define TAB_BAR_FRAME                          [BaseTabBarController shareBaseTabBarController].tabBar.frame
+#define TAB_BAR_FRAME                          [YZHTabBarController shareTabBarController].tabBar.frame
 
 #define STATUS_BAR_HEIGHT                      [[UIApplication sharedApplication] statusBarFrame].size.height
 #define CONST_STATUS_BAR_HEIGHT                 (20)
 #define NAV_BAR_HEIGHT                         self.navigationController.navigationBar.frame.size.height
 #define VIEW_NAV_BAR_HEIGHT                    self.viewController.navigationController.navigationBar.bounds.size.height
-//#define TAB_BAR_HEIGHT                         [BaseTabBarController shareBaseTabBarController].tabBar.frame.size.height
 #define CONST_NAV_BAR_HEIGHT                   (44)
 #define TAB_BAR_HEIGHT                         [YZHTabBarController shareTabBarController].tabBar.frame.size.height
 
@@ -179,6 +180,7 @@
 #define IS_AVAILABLE_NSSET_OBJ(NSSET_OBJ)       (NSSET_OBJ != nil && NSSET_OBJ.count > 0)
 #define IS_AVAILABLE_NSOBJECT_NOT_NULL(OBJ)     ((OBJ) != nil &&  (OBJ) != [NSNull null])
 #define IS_AVAILABLE_CGSIZE(SIZE)               ((SIZE.width >0) && (SIZE.height > 0))
+#define IS_AVAILABLE_DATA(DATA)                 (DATA != nil && DATA.length > 0)
 
 
 //返回的一些安全操作
@@ -439,9 +441,13 @@
 #define USEC_FROM_DATE_SINCE1970(DATE)           ((uint64_t)([DATE timeIntervalSince1970] * USEC_PER_SEC))
 #define DATE_FROM_USEC_SINCE1970(TIME)           ([NSDate dateWithTimeIntervalSince1970:TIME * 1.0/USEC_PER_SEC])
 
+
 #define MSEC_PER_SEC                             (1000)
 #define MSEC_FROM_DATE_SINCE1970(DATE)           ((uint64_t)([DATE timeIntervalSince1970] * MSEC_PER_SEC))
 #define DATE_FROM_MSEC_SINCE1970(TIME)           ([NSDate dateWithTimeIntervalSince1970:TIME * 1.0/MSEC_PER_SEC])
+
+#define USEC_FROM_DATE_SINCE1970_NOW             USEC_FROM_DATE_SINCE1970([NSDate date])
+#define MSEC_FROM_DATE_SINCE1970_NOW             MSEC_FROM_DATE_SINCE1970([NSDate date])
 
 
 //DBTable
@@ -570,6 +576,19 @@
 
 #define SINGLE_LINE_WIDTH           (1 / SCREEN_SCALE)
 #define SINGLE_LINE_ADJUST_OFFSET   ((1 / SCREEN_SCALE) / 2)
+
+
+#define PROJ_MAIN_COLOR      MainColor //RGB_WITH_INT_WITH_NO_ALPHA(0X00DAAA)
+#define HOME_TAB_BAR_WIDTH   UI_WIDTH(160)
+
+static inline void dispatch_async_in_main_queue(void (^block)(void)) {
+    if (pthread_main_np()) {
+        block();
+    } else {
+        dispatch_async(dispatch_get_main_queue(), block);
+    }
+}
+
 
 #endif /* Macro_h */
 
