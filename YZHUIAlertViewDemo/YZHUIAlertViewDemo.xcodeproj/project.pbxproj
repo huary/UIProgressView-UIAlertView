@@ -35,9 +35,9 @@
 		1C0B977B1EAB56A4001666AF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		1C0B977D1EAB56A4001666AF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1C421CB31EF3C2B800357DC5 /* success@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "success@2x.png"; sourceTree = "<group>"; };
-		1C421CC21EF445EF00357DC5 /* Macro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Macro.h; sourceTree = "<group>"; };
 		1C421CC31EF445EF00357DC5 /* YZHUIAlertView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YZHUIAlertView.h; sourceTree = "<group>"; };
 		1C421CC41EF445EF00357DC5 /* YZHUIAlertView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YZHUIAlertView.m; sourceTree = "<group>"; };
+		1C557E90208F2F4E0006E857 /* Macro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Macro.h; sourceTree = "<group>"; };
 		1C7924791F56BB9C00512172 /* NSKeyboardManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSKeyboardManager.h; sourceTree = "<group>"; };
 		1C79247A1F56BB9C00512172 /* NSKeyboardManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSKeyboardManager.m; sourceTree = "<group>"; };
 		1C7E26692085C38900C2D7A0 /* TestAlertViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestAlertViewController.h; sourceTree = "<group>"; };
@@ -82,6 +82,7 @@
 		1C0B976B1EAB56A4001666AF /* YZHUIAlertViewDemo */ = {
 			isa = PBXGroup;
 			children = (
+				1C557E90208F2F4E0006E857 /* Macro.h */,
 				1C7924781F56BB9C00512172 /* NSKeyboardManager */,
 				1C421CB11EF3C2B800357DC5 /* resource */,
 				1CEC4C021EEA32490052ECE3 /* YZHUIProgressView */,
@@ -123,7 +124,6 @@
 		1C421CC11EF445EF00357DC5 /* YZHUIAlertView */ = {
 			isa = PBXGroup;
 			children = (
-				1C421CC21EF445EF00357DC5 /* Macro.h */,
 				1C421CC31EF445EF00357DC5 /* YZHUIAlertView.h */,
 				1C421CC41EF445EF00357DC5 /* YZHUIAlertView.m */,
 			);

@@ -190,6 +190,7 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
 {
     if (self.completionBlock) {
         self.completionBlock(self, self.dismissTag, finished);
+        _completionBlock = nil;
     }
 }
 

@@ -1350,18 +1350,24 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     [self dismiss];
 }
 
-+(NSInteger)alertViewCountForTag:(NSInteger)tag inView:(UIView*)inView
++(NSArray<YZHUIAlertView*>*)alertViewsForTag:(NSInteger)tag inView:(UIView*)inView
 {
     if (inView == nil) {
         inView = [UIApplication sharedApplication].keyWindow;
     }
     NSInteger cnt = 0;
+    NSMutableArray *views = [NSMutableArray array];
     for (UIView *view in inView.subviews) {
         if (view.tag == tag && [view isKindOfClass:[self class]]) {
-            ++cnt;
+            [views addObject:view];
         }
     }
-    return cnt;
+    return [views copy];
+}
+
++(NSInteger)alertViewCountForTag:(NSInteger)tag inView:(UIView*)inView
+{
+    return [[self class] alertViewsForTag:tag inView:inView].count;
 }
 
 -(void)registerNotification:(BOOL)regist

@@ -162,6 +162,8 @@ typedef void(^YZHUIAlertActionBlock)(YZHAlertActionModel *actionModel, NSDiction
 
 -(void)dismissAnimated:(BOOL)animated;
 
++(NSArray<YZHUIAlertView*>*)alertViewsForTag:(NSInteger)tag inView:(UIView*)inView;
+
 +(NSInteger)alertViewCountForTag:(NSInteger)tag inView:(UIView*)inView;
 
 @property (nonatomic, assign) BOOL outSideUserInteractionEnabled;
