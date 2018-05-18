@@ -7,7 +7,7 @@
 //
 
 #import "YZHUIProgressView.h"
-#import "YZHUIGraphicsImageUtil.h"
+#import "YZHUIGraphicsImage.h"
 
 static YZHUIProgressView *_shareProgressView_s = NULL;
 

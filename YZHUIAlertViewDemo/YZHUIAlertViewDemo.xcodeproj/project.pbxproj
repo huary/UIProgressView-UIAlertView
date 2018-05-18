@@ -15,12 +15,12 @@
 		1C0B977C1EAB56A4001666AF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1C0B977A1EAB56A4001666AF /* LaunchScreen.storyboard */; };
 		1C421CB51EF3C2B800357DC5 /* success@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1C421CB31EF3C2B800357DC5 /* success@2x.png */; };
 		1C421CC51EF445EF00357DC5 /* YZHUIAlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C421CC41EF445EF00357DC5 /* YZHUIAlertView.m */; };
-		1C5A473320AE76DC00B3AC60 /* YZHUIGraphicsImageUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C5A473220AE76DC00B3AC60 /* YZHUIGraphicsImageUtil.m */; };
 		1C79247B1F56BB9C00512172 /* NSKeyboardManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C79247A1F56BB9C00512172 /* NSKeyboardManager.m */; };
 		1C7E266B2085C38900C2D7A0 /* TestAlertViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C7E266A2085C38900C2D7A0 /* TestAlertViewController.m */; };
 		1C7E266E2085C39C00C2D7A0 /* TestProgressViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C7E266D2085C39C00C2D7A0 /* TestProgressViewController.m */; };
 		1CC7DC831EF5228C002B5D09 /* fail@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1CC7DC821EF5228C002B5D09 /* fail@2x.png */; };
 		1CC7DC861EF5229B002B5D09 /* YZHUIProgressView+Default.m in Sources */ = {isa = PBXBuildFile; fileRef = 1CC7DC851EF5229B002B5D09 /* YZHUIProgressView+Default.m */; };
+		1CC86CC020AEA12300005AE3 /* YZHUIGraphicsImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 1CC86CBF20AEA12300005AE3 /* YZHUIGraphicsImage.m */; };
 		1CEC4C051EEA32870052ECE3 /* YZHUIProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1CEC4C041EEA32870052ECE3 /* YZHUIProgressView.m */; };
 /* End PBXBuildFile section */
 
@@ -39,8 +39,6 @@
 		1C421CC31EF445EF00357DC5 /* YZHUIAlertView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YZHUIAlertView.h; sourceTree = "<group>"; };
 		1C421CC41EF445EF00357DC5 /* YZHUIAlertView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YZHUIAlertView.m; sourceTree = "<group>"; };
 		1C557E90208F2F4E0006E857 /* Macro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Macro.h; sourceTree = "<group>"; };
-		1C5A473120AE76DC00B3AC60 /* YZHUIGraphicsImageUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YZHUIGraphicsImageUtil.h; sourceTree = "<group>"; };
-		1C5A473220AE76DC00B3AC60 /* YZHUIGraphicsImageUtil.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = YZHUIGraphicsImageUtil.m; sourceTree = "<group>"; };
 		1C7924791F56BB9C00512172 /* NSKeyboardManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSKeyboardManager.h; sourceTree = "<group>"; };
 		1C79247A1F56BB9C00512172 /* NSKeyboardManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSKeyboardManager.m; sourceTree = "<group>"; };
 		1C7E26692085C38900C2D7A0 /* TestAlertViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestAlertViewController.h; sourceTree = "<group>"; };
@@ -51,6 +49,8 @@
 		1CC7DC821EF5228C002B5D09 /* fail@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fail@2x.png"; sourceTree = "<group>"; };
 		1CC7DC841EF5229B002B5D09 /* YZHUIProgressView+Default.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "YZHUIProgressView+Default.h"; sourceTree = "<group>"; };
 		1CC7DC851EF5229B002B5D09 /* YZHUIProgressView+Default.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "YZHUIProgressView+Default.m"; sourceTree = "<group>"; };
+		1CC86CBE20AEA12300005AE3 /* YZHUIGraphicsImage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YZHUIGraphicsImage.h; sourceTree = "<group>"; };
+		1CC86CBF20AEA12300005AE3 /* YZHUIGraphicsImage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = YZHUIGraphicsImage.m; sourceTree = "<group>"; };
 		1CEC4C031EEA32870052ECE3 /* YZHUIProgressView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YZHUIProgressView.h; sourceTree = "<group>"; };
 		1CEC4C041EEA32870052ECE3 /* YZHUIProgressView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YZHUIProgressView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -150,8 +150,8 @@
 				1CEC4C041EEA32870052ECE3 /* YZHUIProgressView.m */,
 				1CC7DC841EF5229B002B5D09 /* YZHUIProgressView+Default.h */,
 				1CC7DC851EF5229B002B5D09 /* YZHUIProgressView+Default.m */,
-				1C5A473120AE76DC00B3AC60 /* YZHUIGraphicsImageUtil.h */,
-				1C5A473220AE76DC00B3AC60 /* YZHUIGraphicsImageUtil.m */,
+				1CC86CBE20AEA12300005AE3 /* YZHUIGraphicsImage.h */,
+				1CC86CBF20AEA12300005AE3 /* YZHUIGraphicsImage.m */,
 			);
 			path = YZHUIProgressView;
 			sourceTree = "<group>";
@@ -230,13 +230,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1CC86CC020AEA12300005AE3 /* YZHUIGraphicsImage.m in Sources */,
 				1C7E266E2085C39C00C2D7A0 /* TestProgressViewController.m in Sources */,
 				1C0B97741EAB56A4001666AF /* ViewController.m in Sources */,
 				1C421CC51EF445EF00357DC5 /* YZHUIAlertView.m in Sources */,
 				1C0B97711EAB56A4001666AF /* AppDelegate.m in Sources */,
 				1C7E266B2085C38900C2D7A0 /* TestAlertViewController.m in Sources */,
 				1C79247B1F56BB9C00512172 /* NSKeyboardManager.m in Sources */,
-				1C5A473320AE76DC00B3AC60 /* YZHUIGraphicsImageUtil.m in Sources */,
 				1C0B976E1EAB56A4001666AF /* main.m in Sources */,
 				1CEC4C051EEA32870052ECE3 /* YZHUIProgressView.m in Sources */,
 				1CC7DC861EF5229B002B5D09 /* YZHUIProgressView+Default.m in Sources */,

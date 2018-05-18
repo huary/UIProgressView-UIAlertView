@@ -1,12 +1,12 @@
 //
-//  YZHUIGraphicsImageUtil.m
+//  YZHUIGraphicsImage.m
 //  YZHUIAlertViewDemo
 //
 //  Created by yuan on 2018/5/18.
 //  Copyright © 2018年 yuan. All rights reserved.
 //
 
-#import "YZHUIGraphicsImageUtil.h"
+#import "YZHUIGraphicsImage.h"
 
 @implementation YZHUIGraphicsImageBeginInfo
 
