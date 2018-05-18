@@ -51,6 +51,7 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
 -(void)_setupDefaultValue
 {
     self.contentInsets = UIEdgeInsetsMake(15, 15, 15, 15);
+    self.midSpaceWithTopBottomInsetsRatio = 0.4;
     self.indicatorViewSize = CGSizeMake(40, 40);
     self.customContentSize = CGSizeZero;
     self.canClose = YES;
@@ -224,14 +225,20 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
     
     CGFloat width = MAX(animationSize.width, titleSize.width) + self.contentInsets.left + self.contentInsets.right;
     
-    //总共的空白区域为2top + 2bottom，
-    //中间空白区域为 midRatio *（top+bottom）,越大的话相距越近，上下越高，
-    /*
-     *top的高度为 top*(1 + midRatio);
-     *mid的高度为 （top+bottom）* （1 - midRatio）
-     *bottom的的高度为 bottom * (1 + midRatio);
+    /** midSpaceWithTopBottomInsetsRatio,中间的距离,默认为0.4
+     * 总共的空白区域为2top + 2bottom，
+     * 中间空白区域为 (1-midSpaceWithTopBottomInsetsRatio) *（top+bottom）,值越大的话相距越近，上下越高，
+     * top的高度为 top*(1 + midRatio) = X;
+     * mid的高度为 （top+bottom）* （1 - midRatio）= Y;
+     * bottom的的高度为 bottom * (1 + midRatio) = Z;
+     * 通过已知的X,Y,Z高度可以求得如下：
+     * top = (X+Y+Z)*X/(2 * (X+Z))
+     * bottom = (X+Y+Z)*Z/(2 * (X+Z))
+     * midRatio = (X-Y+Z)/(X+Y+Z)
+     * 根据默认的contentInsets=UIEdgeInsetsMake(15, 15, 15, 15),可以求知
+     * top = 21,bottom = 21, mid = 18,
      */
-    CGFloat midRatio = 0.4;
+    CGFloat midRatio = self.midSpaceWithTopBottomInsetsRatio;
     CGFloat titleHeight = titleSize.height + self.contentInsets.bottom * 2 * (1 + midRatio);
     CGFloat imageHeight = animationSize.height + self.contentInsets.top * 2 * (1 + midRatio);
     CGFloat height = titleSize.height + animationSize.height + 2 * (self.contentInsets.top + self.contentInsets.bottom);

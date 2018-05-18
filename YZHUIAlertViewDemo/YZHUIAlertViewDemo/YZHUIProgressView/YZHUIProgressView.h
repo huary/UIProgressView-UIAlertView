@@ -40,8 +40,23 @@ typedef void(^YZHUIProgressDismissCompletionBlock)(YZHUIProgressView *progressVi
 /** customContentSize 自定义的大小 */
 @property (nonatomic, assign) CGSize customContentSize;
 
-/** 边框 */
+/** 边框,默认是UIEdgeInsetsMake(15, 15, 15, 15) */
 @property (nonatomic, assign) UIEdgeInsets contentInsets;
+
+/** midSpaceWithTopBottomInsetsRatio,中间的距离,默认为0.4
+ * 总共的空白区域为2top + 2bottom，
+ * 中间空白区域为 (1-midSpaceWithTopBottomInsetsRatio) *（top+bottom）,值越大的话相距越近，上下越高，
+ * top的高度为 top*(1 + midRatio) = X;
+ * mid的高度为 （top+bottom）* （1 - midRatio）= Y;
+ * bottom的的高度为 bottom * (1 + midRatio) = Z;
+ * 通过已知的X,Y,Z高度可以求得如下：
+ * top = (X+Y+Z)*X/(2 * (X+Z))
+ * bottom = (X+Y+Z)*Z/(2 * (X+Z))
+ * midRatio = (X-Y+Z)/(X+Y+Z)
+ * 根据默认的contentInsets=UIEdgeInsetsMake(15, 15, 15, 15),可以求知
+ * top = 21,bottom = 21, mid = 18,
+ */
+@property (nonatomic, assign) CGFloat midSpaceWithTopBottomInsetsRatio;
 
 /** 是否允许关闭,default is YES */
 @property (nonatomic, assign) BOOL canClose;
