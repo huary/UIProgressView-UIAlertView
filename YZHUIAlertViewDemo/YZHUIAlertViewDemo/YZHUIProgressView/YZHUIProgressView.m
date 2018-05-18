@@ -7,6 +7,7 @@
 //
 
 #import "YZHUIProgressView.h"
+#import "YZHUIGraphicsImageUtil.h"
 
 static YZHUIProgressView *_shareProgressView_s = NULL;
 
@@ -16,8 +17,13 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
 
 @property (nonatomic, strong) UIActivityIndicatorView *indicatorView;
 
-@property (nonatomic, assign) UIEdgeInsets animationViewEdgeInsetsRatio;
-@property (nonatomic, assign) UIEdgeInsets titleViewEdgeInsetsRatio;
+/** imageHeightRatio */
+@property (nonatomic, assign) CGFloat imageHeightRatio;
+/** indicatorViewSize */
+@property (nonatomic, assign) CGSize indicatorViewSize;
+
+/** closeBtn */
+@property (nonatomic, strong) UIButton *closeButton;
 
 @end
 
@@ -36,18 +42,18 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
 {
     self = [super init];
     if (self) {
-        [self setUpDefaultValue];
-        [self setUpChildView];
+        [self _setupDefaultValue];
+        [self _setupChildView];
     }
     return self;
 }
 
--(void)setUpDefaultValue
+-(void)_setupDefaultValue
 {
-    CGFloat titleTopRatio = 0.58;
-    CGFloat titleTopBottomRatio = 0.22;
-    self.animationViewEdgeInsetsRatio = UIEdgeInsetsMake(0.1, 0, 1-titleTopRatio, 0);
-    self.titleViewEdgeInsetsRatio = UIEdgeInsetsMake(titleTopRatio + titleTopBottomRatio/2, 20, titleTopBottomRatio/2, 20);
+    self.contentInsets = UIEdgeInsetsMake(15, 15, 15, 15);
+    self.indicatorViewSize = CGSizeMake(40, 40);
+    self.customContentSize = CGSizeZero;
+    self.canClose = YES;
 }
 
 -(YZHUIAlertView*)alertView
@@ -61,16 +67,16 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
     return _alertView;
 }
 
--(void)setUpChildView
+-(void)_setupChildView
 {
     _animationView = [[UIImageView alloc] init];
-    self.animationView.backgroundColor = CLEAR_COLOR;//PURPLE_COLOR;
+    self.animationView.backgroundColor = CLEAR_COLOR;
     self.animationView.contentMode = UIViewContentModeCenter;
     [self addSubview:self.animationView];
     
     _titleView = [[UILabel alloc] init];
     self.titleView.font = FONT(18);
-    self.titleView.backgroundColor = CLEAR_COLOR;//RED_COLOR;
+    self.titleView.backgroundColor = CLEAR_COLOR;
     self.titleView.textAlignment = NSTextAlignmentCenter;
     [self addSubview:self.titleView];
     
@@ -80,36 +86,11 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
     [self _updateIndicatorView];
     
     [self setContentColor:WHITE_COLOR];
+    
+    UIButton *closeBtn = [self _createCloseBtn];
+    [self addSubview:closeBtn];
+    self.closeButton = closeBtn;
 }
-
-//-(BOOL)_checkInsetsRatio:(UIEdgeInsets)insetRatio
-//{
-//    CGFloat diff = 1 - insetRatio.left - insetRatio.right;
-//    if (diff <= 0) {
-//        return NO;
-//    }
-//    diff = 1 - insetRatio.top - insetRatio.bottom;
-//    if (diff <= 0) {
-//        return NO;
-//    }
-//    return YES;
-//}
-//
-//-(void)setTitleViewEdgeInsetsRatio:(UIEdgeInsets)titleViewEdgeInsetsRatio
-//{
-//    if (![self _checkInsetsRatio:titleViewEdgeInsetsRatio]) {
-//        return;
-//    }
-//    _titleViewEdgeInsetsRatio = titleViewEdgeInsetsRatio;
-//}
-//
-//-(void)setAnimationViewEdgeInsetsRatio:(UIEdgeInsets)animationViewEdgeInsetsRatio
-//{
-//    if (![self _checkInsetsRatio:animationViewEdgeInsetsRatio]) {
-//        return;
-//    }
-//    _animationViewEdgeInsetsRatio = animationViewEdgeInsetsRatio;
-//}
 
 -(void)setCustomView:(UIView *)customView
 {
@@ -142,12 +123,42 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
     }
 }
 
+-(UIImage*)_createCloseImage:(UIColor*)strokeColor
+{
+    CGSize graphicsSize = CGSizeMake(10, 10);
+    YZHUIGraphicsImageContext *ctx = [[YZHUIGraphicsImageContext alloc] initWithBeginBlock:^(YZHUIGraphicsImageContext *context) {
+        context.beginInfo = [[YZHUIGraphicsImageBeginInfo alloc] init];
+        context.beginInfo.lineWidth = 2.0;
+        context.beginInfo.graphicsSize = graphicsSize;
+    } runBlock:^(YZHUIGraphicsImageContext *context) {
+        CGContextMoveToPoint(context.ctx, 0, 0);
+        CGContextAddLineToPoint(context.ctx, graphicsSize.width, graphicsSize.height);
+        CGContextMoveToPoint(context.ctx, graphicsSize.width, 0);
+        CGContextAddLineToPoint(context.ctx, 0, graphicsSize.height);
+    } endPathBlock:nil];
+    return [ctx createGraphicesImageWithStrokeColor:strokeColor];
+}
+
+-(UIButton*)_createCloseBtn
+{
+    CGFloat w = 20;
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.frame = CGRectMake(0, 0, w, w);
+    button.layer.cornerRadius = w/2;
+    [button setImage:[self _createCloseImage:RED_COLOR] forState:UIControlStateNormal];
+    [button addTarget:self action:@selector(_closeAction:) forControlEvents:UIControlEventTouchUpInside];
+    return button;
+}
+
+-(void)_closeAction:(UIButton*)sender
+{
+    [self dismiss];
+}
+
 -(void)setProgressViewStyle:(YZHUIProgressViewStyle)progressViewStyle
 {
-//    if (_progressViewStyle != progressViewStyle) {
-        _progressViewStyle = progressViewStyle;
-        [self _updateIndicatorView];
-//    }
+    _progressViewStyle = progressViewStyle;
+    [self _updateIndicatorView];
 }
 
 -(void)setContentColor:(UIColor *)contentColor
@@ -164,9 +175,7 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
     _showTimeInterval = showTimeInterval;
     [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(_doTimeoutAction) object:nil];
     if (showTimeInterval > 0) {
-//        DISPATCH_MAIN_THREAD_ASYNC(^{
         [self performSelector:@selector(_doTimeoutAction) withObject:nil afterDelay:showTimeInterval];
-//        });
     }
     else {
         self.timeoutBlock = nil;
@@ -203,60 +212,91 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
     };
 }
 
--(CGSize)_getContentSizeByContent
+-(CGSize)_getContentSizeByContentWithImageViewRect:(CGRect*)imageViewRect titleRect:(CGRect*)titleRect
 {
     [self.titleView sizeToFit];
     [self.animationView sizeToFit];
     CGSize titleSize = self.titleView.bounds.size;
     CGSize animationSize = self.animationView.bounds.size;
-    CGFloat width = 0;
-    CGFloat height = 0;
-    UIEdgeInsets insetsRatio = UIEdgeInsetsZero;
-    if (!CGSizeEqualToSize(titleSize, CGSizeZero)) {
-        insetsRatio = self.titleViewEdgeInsetsRatio;
-        width = titleSize.width + insetsRatio.left + insetsRatio.right;
-        height = titleSize.height;
+    if (CGSizeEqualToSize(animationSize, CGSizeZero)) {
+        animationSize = self.indicatorViewSize;
     }
-    else if (!CGSizeEqualToSize(animationSize, CGSizeZero))
-    {
-        insetsRatio = self.animationViewEdgeInsetsRatio;
-        width = animationSize.width;
-        height = animationSize.height;
+    
+    CGFloat width = MAX(animationSize.width, titleSize.width) + self.contentInsets.left + self.contentInsets.right;
+    
+    //总共的空白区域为2top + 2bottom，
+    //中间空白区域为 midRatio *（top+bottom）,越大的话相距越近，上下越高，
+    /*
+     *top的高度为 top*(1 + midRatio);
+     *mid的高度为 （top+bottom）* （1 - midRatio）
+     *bottom的的高度为 bottom * (1 + midRatio);
+     */
+    CGFloat midRatio = 0.4;
+    CGFloat titleHeight = titleSize.height + self.contentInsets.bottom * 2 * (1 + midRatio);
+    CGFloat imageHeight = animationSize.height + self.contentInsets.top * 2 * (1 + midRatio);
+    CGFloat height = titleSize.height + animationSize.height + 2 * (self.contentInsets.top + self.contentInsets.bottom);
+    if (CGSizeEqualToSize(titleSize, CGSizeZero)) {
+        titleHeight = 0;
+        imageHeight = animationSize.height +  self.contentInsets.top + self.contentInsets.bottom;
+        height = imageHeight;
     }
-    //        if (insetsRatio.left + insetsRatio.right < 1) {
-    //            width = width / (1 - insetsRatio.left - insetsRatio.right);
-    //        }
-    if (insetsRatio.top + insetsRatio.bottom < 1) {
-        height = height / (1 - insetsRatio.top - insetsRatio.bottom);
+    
+    if (imageViewRect) {
+        *imageViewRect = CGRectMake(0, 0, width, imageHeight);
+    }
+    if (titleRect) {
+        CGFloat y = height - titleHeight;
+        *titleRect = CGRectMake(0, y, width, titleHeight);
     }
     return CGSizeMake(width, height);
 }
 
--(CGSize)_getContentSize
+-(CGSize)_getContentSizeWithImageViewRect:(CGRect*)imageViewRect titleRect:(CGRect*)titleRect
 {
-    CGSize size = self.bounds.size;
-    CGSize contentSize = [self _getContentSizeByContent];
-//    if (contentSize.width >= size.width && contentSize.height >= size.height) {
-//        size = contentSize;
-//    }
-    if (CGSizeEqualToSize(size, contentSize) == NO) {
-        size = contentSize;
+    if (CGSizeEqualToSize(self.customContentSize, CGSizeZero)) {
+        return [self _getContentSizeByContentWithImageViewRect:imageViewRect titleRect:titleRect];
     }
-    return size;
+    else {
+        CGRect titleRectTmp = CGRectZero;
+        CGRect imageViewRectTmp = CGRectZero;
+        CGSize contentSize = [self _getContentSizeByContentWithImageViewRect:&imageViewRectTmp titleRect:&titleRectTmp];
+        CGFloat heightRatio = 1.0;
+        if (contentSize.height > 0) {
+            heightRatio = self.customContentSize.height / contentSize.height;
+        }
+        titleRectTmp.size.width = titleRectTmp.size.width * heightRatio;
+        titleRectTmp.size.height = titleRectTmp.size.height * heightRatio;
+        titleRectTmp.origin.x = (self.customContentSize.width - titleRectTmp.size.width)/2;
+        titleRectTmp.origin.y = titleRectTmp.origin.y * heightRatio;
+        
+        imageViewRectTmp.size.width = imageViewRectTmp.size.width * heightRatio;
+        imageViewRectTmp.size.height = imageViewRectTmp.size.height * heightRatio;
+        imageViewRectTmp.origin.x = (self.customContentSize.width - imageViewRectTmp.size.width)/2;
+        imageViewRectTmp.origin.y = imageViewRectTmp.origin.y * heightRatio;
+        
+        if (imageViewRect) {
+            *imageViewRect = imageViewRectTmp;
+        }
+        
+        if (titleRect) {
+            *titleRect = titleRectTmp;
+        }
+        
+        return self.customContentSize;
+    }
 }
 
 -(void)layoutSubviews
 {
     [super layoutSubviews];
-    CGSize size = [self _getContentSize];
-    self.frame = CGRectMake(0, 0, size.width, size.height);
-    UIEdgeInsets insetRatio = self.titleViewEdgeInsetsRatio;
-//    self.titleView.frame = CGRectMake(insetRatio.left * size.width, insetRatio.top * size.height, (1-insetRatio.left-insetRatio.right) * size.width, (1-insetRatio.top-insetRatio.bottom) * size.height);
-    self.titleView.frame = CGRectMake(0, insetRatio.top * size.height, size.width, (1-insetRatio.top-insetRatio.bottom) * size.height);
     
-    insetRatio = self.animationViewEdgeInsetsRatio;
-//    self.animationView.frame = CGRectMake(insetRatio.left * size.width, insetRatio.top * size.height, (1-insetRatio.left-insetRatio.right) * size.width, (1-insetRatio.top-insetRatio.bottom) * size.height);
-    self.animationView.frame = CGRectMake(insetRatio.left * size.width, insetRatio.top * size.height, size.width, (1-insetRatio.top-insetRatio.bottom) * size.height);
+    CGRect imageRect = CGRectZero;
+    CGRect titleRect = CGRectZero;
+    CGSize size = [self _getContentSizeWithImageViewRect:&imageRect titleRect:&titleRect];
+    self.frame = CGRectMake(0, 0, size.width, size.height);
+    self.titleView.frame = titleRect;
+    self.animationView.frame = imageRect;
+    
     if (self.customView) {
         self.customView.frame = self.bounds;
     }
@@ -264,6 +304,7 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
     if (self.indicatorView) {
         self.indicatorView.frame = self.animationView.bounds;
     }
+    self.closeButton.hidden = !self.canClose;
 }
 
 -(void)_doUpdateAnimationImages:(NSArray<UIImage*>*)animationImages
@@ -356,8 +397,8 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
 }
 
 -(void)_doUpdateProgressView
-{    
-    CGSize size = [self _getContentSize];
+{
+    CGSize size = [self _getContentSizeWithImageViewRect:NULL titleRect:NULL];
     self.alertView.bounds = CGRectMake(0, 0, size.width, size.height);
 }
 
@@ -435,7 +476,6 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
         [self.customView removeFromSuperview];
         self.customView = nil;
     }
-//    [self dismiss];
     [super removeFromSuperview];
 }
 
