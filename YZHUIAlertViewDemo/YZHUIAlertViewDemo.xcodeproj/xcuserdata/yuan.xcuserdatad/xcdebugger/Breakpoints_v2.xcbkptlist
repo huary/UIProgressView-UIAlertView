@@ -26,7 +26,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "YZHUIAlertViewDemo/ViewController.m"
-            timestampString = "548305007.470879"
+            timestampString = "548867807.46745"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "327"
@@ -42,7 +42,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "YZHUIAlertViewDemo/ViewController.m"
-            timestampString = "548305007.471212"
+            timestampString = "548867807.4701819"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "317"
@@ -57,29 +57,13 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "YZHUIAlertViewDemo/YZHUIProgressView/YZHUIAlertView/YZHUIAlertView.m"
-            timestampString = "545735748.270797"
+            filePath = "YZHUIAlertViewDemo/TestProgressViewController.m"
+            timestampString = "548911144.139951"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "879"
-            endingLineNumber = "879"
-            landmarkName = "-_createAlertActionCellWithShowInView:"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "YZHUIAlertViewDemo/YZHUIProgressView/YZHUIAlertView/YZHUIAlertView.m"
-            timestampString = "545735748.270892"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "990"
-            endingLineNumber = "990"
-            landmarkName = "-_createAlertActionCellWithShowInView:"
+            startingLineNumber = "150"
+            endingLineNumber = "150"
+            landmarkName = "-dealloc"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

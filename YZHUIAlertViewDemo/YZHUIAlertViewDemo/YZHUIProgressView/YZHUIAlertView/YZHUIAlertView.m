@@ -12,7 +12,7 @@
 
 #define ACTION_CELL_SUBVIEW_TAG             (1234)
 
-#define TOP_ALERT_VIEW_MIN_HEIGHT           (CONST_STATUS_NAV_BAR_HEIGHT)
+#define TOP_ALERT_VIEW_MIN_HEIGHT           (64)
 #define TOP_ALERT_VIEW_HEIGHT               (100)
 
 
@@ -418,10 +418,10 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
 
 @interface YZHUIAlertView ()
 
+@property (nonatomic, weak) UIView *showInView;
+
 //cover
 @property (nonatomic, strong) UIButton *cover;
-@property (nonatomic, copy) UIColor *coverColor;
-@property (nonatomic, assign) CGFloat coverAlpha;
 
 //effectview
 @property (nonatomic, strong) UIView *effectView;
@@ -438,7 +438,6 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
 @property (nonatomic, strong) YZHAlertActionModel *cancelModel;
 
 @property (nonatomic, assign) BOOL isCreate;
-@property (nonatomic, weak) UIView *showInView;
 
 @property (nonatomic, strong) NSKeyboardManager *keyboardManager;
 
@@ -670,7 +669,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
 -(void)setOutSideUserInteractionEnabled:(BOOL)outSideUserInteractionEnabled
 {
     _outSideUserInteractionEnabled = outSideUserInteractionEnabled;
-    if (self.cover) {
+    if (self.cover && outSideUserInteractionEnabled) {
         [self.cover removeFromSuperview];
         self.cover = nil;
     }
@@ -1192,14 +1191,32 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     [self.actionModels addObject:model];
 }
 
-
--(void)alertShowInView:(UIView*)inView
+-(CGFloat)_getDefaultAnimateDuration
 {
+    if (YZHUIALERT_VIEW_STYLE_IS_TIPS(self.alertViewStyle)) {
+        return defaultYZHUIAlertViewStyleTopTipsAnimateDuration;
+    }
+    else if (YZHUIALERT_VIEW_STYLE_IS_ALERT(self.alertViewStyle))
+    {
+        return defaultYZHUIAlertViewStyleAlertAnimateDuration;
+    }
+    else if (YZHUIALERT_VIEW_STYLE_IS_SHEET(self.alertViewStyle))
+    {
+        return defaultYZHUIAlertViewStyleActionSheetAnimateDuration;
+    }
+    return 0;
+}
+
+-(void)_showInView:(UIView *)inView frame:(CGRect)frame
+{
+    if (CGSizeEqualToSize(frame.size, CGSizeZero)) {
+        frame = self.showInView.bounds;
+    }
     [self prepareShowInView:inView];
     
     [self.showInView addSubview:self];
     
-    self.cover.frame = self.showInView.bounds;
+    self.cover.frame = frame;
     if (self.cover) {
         [self.showInView insertSubview:self.cover belowSubview:self];
     }
@@ -1209,8 +1226,8 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
             [self performSelector:@selector(dismiss) withObject:nil afterDelay:self.delayDismissInterval];
         }
         [self registerNotification:YES];
-        if (self.showCompletionBlock) {
-            self.showCompletionBlock(self);
+        if (self.didShowBlock) {
+            self.didShowBlock(self);
         }
     };
     
@@ -1257,23 +1274,12 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     }
 }
 
--(CGFloat)_getDefaultAnimateDuration
+-(void)alertShowInView:(UIView*)inView
 {
-    if (YZHUIALERT_VIEW_STYLE_IS_TIPS(self.alertViewStyle)) {
-        return defaultYZHUIAlertViewStyleTopTipsAnimateDuration;
-    }
-    else if (YZHUIALERT_VIEW_STYLE_IS_ALERT(self.alertViewStyle))
-    {
-        return defaultYZHUIAlertViewStyleAlertAnimateDuration;
-    }
-    else if (YZHUIALERT_VIEW_STYLE_IS_SHEET(self.alertViewStyle))
-    {
-        return defaultYZHUIAlertViewStyleActionSheetAnimateDuration;
-    }
-    return 0;
+    [self _showInView:inView frame:CGRectZero];
 }
 
--(void)alertShowInView:(UIView *)inView animated:(BOOL)animated
+-(void)_prepareAnimation:(BOOL)animated
 {
     if (!animated) {
         self.animateDuration = 0;
@@ -1284,14 +1290,40 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
             self.animateDuration = [self _getDefaultAnimateDuration];
         }
     }
+}
+
+-(void)alertShowInView:(UIView *)inView animated:(BOOL)animated
+{
+    [self _prepareAnimation:animated];
     [self alertShowInView:inView];
+}
+
+-(void)alertShowInView:(UIView *)inView frame:(CGRect)frame
+{
+    [self _showInView:inView frame:frame];
+}
+
+-(void)alertShowInView:(UIView *)inView frame:(CGRect)frame animated:(BOOL)animated
+{
+    [self _prepareAnimation:animated];
+    [self _showInView:inView frame:frame];
 }
 
 -(void)_dispatchCompletionAction:(BOOL)finished
 {
+//    NSLog(@"self=%@,showInView=%@,supperView=%@",self,self.showInView,self.showInView.superview);
     if (self.dismissCompletionBlock) {
         self.dismissCompletionBlock(self, finished);
     }
+}
+
+-(void)_dismissAction
+{
+    [self.cover removeFromSuperview];
+    self.cover = nil;
+    [self.customContentAlertView removeFromSuperview];
+    self.customContentAlertView = nil;
+    [self _dispatchCompletionAction:YES];
 }
 
 -(void)dismiss
@@ -1299,12 +1331,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     [self endEditing:YES];
     
     void (^completionBlock)(BOOL finished) = ^(BOOL finished){
-        [self.cover removeFromSuperview];
-        self.cover = nil;
-        [self.customContentAlertView removeFromSuperview];
-        self.customContentAlertView = nil;
         [self removeFromSuperview];
-        [self _dispatchCompletionAction:finished];
     };
     
     if (YZHUIALERT_VIEW_STYLE_IS_ALERT(self.alertViewStyle)) {
@@ -1350,12 +1377,16 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     [self dismiss];
 }
 
+-(UIView*)getShowInView
+{
+    return self.showInView;
+}
+
 +(NSArray<YZHUIAlertView*>*)alertViewsForTag:(NSInteger)tag inView:(UIView*)inView
 {
     if (inView == nil) {
         inView = [UIApplication sharedApplication].keyWindow;
     }
-    NSInteger cnt = 0;
     NSMutableArray *views = [NSMutableArray array];
     for (UIView *view in inView.subviews) {
         if (view.tag == tag && [view isKindOfClass:[self class]]) {
@@ -1438,10 +1469,18 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
 }
 
 #endif
+
 -(void)dealloc
 {
     NSLog(@"YZHUIAlertView-----------dealloc");
     [self registerNotification:NO];
+}
+
+#pragma mark override
+-(void)removeFromSuperview
+{
+    [self _dismissAction];
+    [super removeFromSuperview];
 }
 
 @end
@@ -1581,15 +1620,5 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
         }
     }];
     return [mutDict copy];
-}
-
-#pragma mark override
--(void)removeFromSuperview
-{
-    [self.cover removeFromSuperview];
-    self.cover = nil;
-    [self.customContentAlertView removeFromSuperview];
-    self.customContentAlertView = nil;
-    [super removeFromSuperview];
 }
 @end

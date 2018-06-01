@@ -12,6 +12,9 @@
 
 @interface TestProgressViewController ()
 
+/** 注释 */
+@property (nonatomic, strong) UIView *testView;
+
 @end
 
 @implementation TestProgressViewController
@@ -42,13 +45,17 @@
 
     frame.origin.x = CGRectGetMaxX(frame) + space;
     btn = [self _createBtnWithTitle:@"outEnable" frame:frame tag:3];
-
-//    frame.origin.x = x;
-//    frame.origin.y = CGRectGetMaxY(frame) + 20;
-//    btn = [self _createBtnWithTitle:@"Custom2" frame:frame tag:4];
-//
-//    frame.origin.x = CGRectGetMaxX(frame) + space;
-//    btn = [self _createBtnWithTitle:@"Sheet" frame:frame tag:5];
+    
+    frame.origin.x = space;
+    frame.origin.y = CGRectGetMaxY(btn.frame) + UI_HEIGHT(20);
+    btn = [self _createBtnWithTitle:@"InView" frame:frame tag:4];
+    
+    UIView *testView = [[UIView alloc] init];
+    CGFloat y = CGRectGetMaxY(btn.frame);
+    testView.frame = CGRectMake(0, y, SAFE_WIDTH, SAFE_HEIGHT - y);
+    testView.backgroundColor = ORANGE_COLOR;
+    [self.view addSubview:testView];
+    self.testView = testView;
 }
 
 -(void)_createBackButton
@@ -116,6 +123,15 @@
         [shareProgressView progressShowTitleText:@"正在阻塞中"];
         shareProgressView.outSideUserInteractionEnabled = YES;
     }
+    else if (sender.tag == 4) {
+        YZHUIProgressView *progressView = [YZHUIProgressView shareProgressView];
+        progressView.completionBlock = ^(YZHUIProgressView *progressView, NSInteger dismissTag, BOOL finished) {
+//            NSLog(@"supperView=%@",progressView.alertView.showInView.superview);
+//            UIView *showInViewTmp = progressView.alertView.showInView;
+//            NSLog(@"showInView=%@",showInViewTmp);
+        };
+        [progressView progressShowInView:self.testView titleText:@"test" showTimeInterval:10];
+    }
 }
 
 -(void)_updateAgain:(YZHUIProgressView*)progressView
@@ -127,6 +143,11 @@
 -(void)_testAction:(id)sender
 {
     [[YZHUIProgressView shareProgressView] dismiss];
+}
+
+-(void)dealloc
+{
+    NSLog(@"VC=============dealloc");
 }
 
 

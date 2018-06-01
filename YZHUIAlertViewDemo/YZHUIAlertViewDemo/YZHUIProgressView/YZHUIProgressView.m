@@ -13,7 +13,6 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
 
 @interface YZHUIProgressView ()
 
-@property (nonatomic, strong) YZHUIAlertView *alertView;
 
 @property (nonatomic, strong) UIActivityIndicatorView *indicatorView;
 
@@ -28,6 +27,8 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
 @end
 
 @implementation YZHUIProgressView
+
+@synthesize alertView = _alertView;
 
 +(instancetype)shareProgressView
 {
@@ -468,13 +469,18 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
     [self _doUpdateProgressView];
 }
 
+-(void)_dismissAction
+{
+    _isShowing = NO;
+    _alertView = nil;
+    self.showTimeInterval = 0;
+}
+
 -(void)dismiss
 {
     //这里不能用self.alertView,因为这里重写了get方法
     [_alertView dismiss];
-    _isShowing = NO;
-    self.alertView = nil;
-    self.showTimeInterval = 0;
+    [self _dismissAction];
 }
 
 -(void)removeFromSuperview
@@ -483,6 +489,7 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
         [self.customView removeFromSuperview];
         self.customView = nil;
     }
+    [self _dismissAction];
     [super removeFromSuperview];
 }
 

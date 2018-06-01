@@ -82,7 +82,7 @@ typedef NS_ENUM(NSInteger, YZHUIAlertActionTextStyle)
 
 @class YZHUIAlertView;
 typedef UIView*(^YZHUIAlertActionCellCustomViewBlock)(YZHAlertActionModel *actionModel, UIView <UIAlertActionCellProtocol>*actionCell);
-typedef void(^YZHUIAlertShowCompletionBlock)(YZHUIAlertView *alertView);
+typedef void(^YZHUIAlertDidShowBlock)(YZHUIAlertView *alertView);
 typedef void(^YZHUIAlertDismissCompletionBlock)(YZHUIAlertView *alertView, BOOL finished);
 
 
@@ -123,11 +123,14 @@ typedef void(^YZHUIAlertActionBlock)(YZHAlertActionModel *actionModel, NSDiction
  ********************************************************************************/
 @interface YZHUIAlertView : UIView
 
+@property (nonatomic, copy) UIColor *coverColor;
+@property (nonatomic, assign) CGFloat coverAlpha;
+
 @property (nonatomic, copy) YZHUIAlertActionBlock coverActionBlock;
 //这是是在force的style的情况下没有提供action的时候，控件会自动生成action，这个action的block需要开发者指定如下
 @property (nonatomic, copy) YZHUIAlertActionBlock forceActionBlock;
 //显示完成的回调
-@property (nonatomic, copy) YZHUIAlertShowCompletionBlock showCompletionBlock;
+@property (nonatomic, copy) YZHUIAlertDidShowBlock didShowBlock;
 //
 @property (nonatomic, copy) YZHUIAlertDismissCompletionBlock dismissCompletionBlock;
 
@@ -158,14 +161,21 @@ typedef void(^YZHUIAlertActionBlock)(YZHAlertActionModel *actionModel, NSDiction
 
 -(void)alertShowInView:(UIView *)inView animated:(BOOL)animated;
 
+-(void)alertShowInView:(UIView *)inView frame:(CGRect)frame;
+
+-(void)alertShowInView:(UIView *)inView frame:(CGRect)frame animated:(BOOL)animated;
+
 -(void)dismiss;
 
 -(void)dismissAnimated:(BOOL)animated;
+
+-(UIView*)getShowInView;
 
 +(NSArray<YZHUIAlertView*>*)alertViewsForTag:(NSInteger)tag inView:(UIView*)inView;
 
 +(NSInteger)alertViewCountForTag:(NSInteger)tag inView:(UIView*)inView;
 
+//default is NO
 @property (nonatomic, assign) BOOL outSideUserInteractionEnabled;
 
 //只针对YZHUIAlertViewStyleAlertInfo有效

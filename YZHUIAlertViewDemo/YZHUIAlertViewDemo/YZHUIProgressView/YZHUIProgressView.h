@@ -21,6 +21,7 @@ typedef void(^YZHUIProgressDismissCompletionBlock)(YZHUIProgressView *progressVi
 
 @interface YZHUIProgressView : UIView
 
+@property (nonatomic, strong, readonly) YZHUIAlertView *alertView;
 @property (nonatomic, strong, readonly) UIImageView *animationView;
 @property (nonatomic, strong, readonly) UILabel *titleView;
 
