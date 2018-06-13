@@ -1209,10 +1209,11 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
 
 -(void)_showInView:(UIView *)inView frame:(CGRect)frame
 {
+    [self prepareShowInView:inView];
+    
     if (CGSizeEqualToSize(frame.size, CGSizeZero)) {
         frame = self.showInView.bounds;
     }
-    [self prepareShowInView:inView];
     
     [self.showInView addSubview:self];
     
