@@ -365,13 +365,10 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     UIView *subView = [self viewWithTag:ACTION_CELL_SUBVIEW_TAG];
     CGRect frame = self.frame;
     
-    CGFloat width = frame.size.width * UIAlertViewTextFieldWidthWithBaseWidthRatio;
-    CGFloat height = frame.size.height * UIAlertViewTextFieldHeightWithBaseHeightRatio;
-    CGFloat x = (frame.size.width - width)/2;
-    CGFloat y = (frame.size.height - height)/2;
+    CGRect newFrame = [self getCellSubViewFrameForCellSize:frame.size];
     
     if (self.actionModel.actionStyle == YZHUIAlertActionStyleTextEdit) {
-        subView.frame = CGRectMake(x, y, width, height);
+        subView.frame = newFrame;
     }
     else if (self.actionModel.actionStyle == YZHUIAlertActionStyleCustomView)
     {
@@ -379,8 +376,25 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     }
     else
     {
-        subView.frame = CGRectMake(x, y, width, height);
+        if (CGRectIsEmpty(subView.frame)) {
+            subView.frame = newFrame;
+        }
     }
+}
+
+-(CGRect)getCellSubViewFrameForCellSize:(CGSize)cellSize
+{
+    CGFloat width = cellSize.width * UIAlertViewTextFieldWidthWithBaseWidthRatio;
+    CGFloat height = cellSize.height * UIAlertViewTextFieldHeightWithBaseHeightRatio;
+    CGFloat x = (cellSize.width - width)/2;
+    CGFloat y = (cellSize.height - height)/2;
+    return CGRectMake(x, y, width, height);
+}
+
+-(void)changeSubViewFrame:(CGRect)frame
+{
+    UIView *subView = [self viewWithTag:ACTION_CELL_SUBVIEW_TAG];
+    subView.frame = frame;
 }
 
 #pragma mark override
@@ -970,6 +984,16 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
                         haveBottomLine = YES;
                         totalY += height;
                     }
+                    else if (YZHUIALERT_VIEW_STYLE_IS_SHEET(self.alertViewStyle) && idx + 1 == cnt) {
+                        CGPoint point = CGPointMake(0, showInViewSize.height);
+                        CGPoint keyPoint = [showInView.superview convertPoint:point toView:[UIApplication sharedApplication].keyWindow];
+                        CGFloat diffHeight = keyPoint.y - CGRectGetMaxY(SAFE_FRAME);
+                        if (diffHeight > 0) {
+                            [cell changeSubViewFrame:[cell getCellSubViewFrameForCellSize:CGSizeMake(width, height)]];
+                            height += diffHeight;
+                        }
+                        totalY += height;
+                    }
                     else
                     {
                         if (attributeCellHeight > height) {
@@ -1022,9 +1046,6 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
             {
                 self.frame =  CGRectMake((showInViewSize.width - contentWidth)/2, (showInViewSize.height - contentHeight)/2, contentWidth, contentHeight);
             }
-//            if (self.alertViewStyle == YZHUIAlertViewStyleAlertInfo && self.delayDismissInterval > 0) {
-//                [self performSelector:@selector(dismiss) withObject:nil afterDelay:self.delayDismissInterval];
-//            }
         }
         else if (YZHUIALERT_VIEW_STYLE_IS_SHEET(self.alertViewStyle))
         {
@@ -1090,7 +1111,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     if (_cancelModel == nil) {
         _cancelModel = [[YZHAlertActionModel alloc] init];
         _cancelModel.actionTitleText = NSLOCAL_STRING(@"取消");
-        _cancelModel.actionStyle = UIAlertActionStyleDefault;
+        _cancelModel.actionStyle = YZHUIAlertActionStyleDefault;
         _cancelModel.actionBlock = [self _alertCancelActionBlock];
     }
     return _cancelModel;

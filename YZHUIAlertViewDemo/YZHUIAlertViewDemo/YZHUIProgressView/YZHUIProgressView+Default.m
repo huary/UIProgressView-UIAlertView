@@ -8,16 +8,24 @@
 
 #import "YZHUIProgressView+Default.h"
 
-@implementation YZHUIProgressView (Default)
+static const CGFloat dismissTime_s = 1.0f;
 
+@implementation YZHUIProgressView (Default)
+#pragma mark - 操作成功简短提示
+
+/**
+ 操作成功提示
+
+ @param successText 提示内容
+ */
 -(void)progressWithSuccessText:(NSString*)successText
 {
-    [self progressWithFailText:successText showTimeInterval:1.0];
+    [self progressWithSuccessText:successText showTimeInterval:dismissTime_s];
 }
 
 -(void)progressWithFailText:(NSString*)failText
 {
-    [self progressWithFailText:failText showTimeInterval:1.0];
+    [self progressWithFailText:failText showTimeInterval:dismissTime_s];
 }
 
 
@@ -35,12 +43,12 @@
 
 -(void)updateWithSuccessText:(NSString*)successText
 {
-    [self updateWithSuccessText:successText showTimeInterval:1.0];
+    [self updateWithSuccessText:successText showTimeInterval:dismissTime_s];
 }
 
 -(void)updateWithFailText:(NSString*)failText
 {
-    [self updateWithFailText:failText showTimeInterval:1.0];
+    [self updateWithFailText:failText showTimeInterval:dismissTime_s];
 }
 
 -(void)updateWithSuccessText:(NSString*)successText showTimeInterval:(NSTimeInterval)timeInterval
