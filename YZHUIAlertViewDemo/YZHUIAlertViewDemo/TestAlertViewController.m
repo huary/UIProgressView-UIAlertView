@@ -61,6 +61,10 @@
     
     frame.origin.x = CGRectGetMaxX(frame) + space;
     btn = [self _createBtnWithTitle:@"attribute" frame:frame tag:6];
+    
+    frame.origin.x = x;
+    frame.origin.y = CGRectGetMaxY(frame) + 20;
+    btn = [self _createBtnWithTitle:@"tips" frame:frame tag:7];
 }
 
 -(void)_createBackButton
@@ -179,7 +183,7 @@
         [alertView addAlertActionWithTitle:@"2" actionStyle:YZHUIAlertActionStyleDefault actionBlock:^(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {
             NSLog(@"actionModel.actionTitle=%@",actionModel.actionTitleText);
         }];
-        [alertView alertShowInView:self.view];
+        [alertView alertShowInView:[UIApplication sharedApplication].keyWindow];
         return;
     }
     else if (sender.tag == 6) {
@@ -198,6 +202,10 @@
                 NSLog(@"key=%@,obj.text=%@",key, obj.alertEditText);
             }];
         };
+    }
+    else if (sender.tag == 7) {
+        alertView = [[YZHUIAlertView alloc] initWithTitle:@"tips" alertViewStyle:YZHUIAlertViewStyleTopInfoTips];
+        alertView.backgroundColor = RED_COLOR;
     }
     [alertView alertShowInView:nil];
 }

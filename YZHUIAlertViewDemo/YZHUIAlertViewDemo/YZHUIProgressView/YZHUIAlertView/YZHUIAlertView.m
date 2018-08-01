@@ -972,7 +972,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
                         if (attributeCellHeight > height) {
                             height = attributeCellHeight;
                         }
-                        haveBottomLine = NO;
+                        haveBottomLine = self.cellHeadTitleMessageHaveSeparatorLine;
                         totalY += height;
                     }
                     else if (obj.actionStyle == YZHUIAlertActionStyleHeadMessage)
@@ -985,8 +985,15 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
                         totalY += height;
                     }
                     else if (YZHUIALERT_VIEW_STYLE_IS_SHEET(self.alertViewStyle) && idx + 1 == cnt) {
+                        if (attributeCellHeight > height) {
+                            height = attributeCellHeight;
+                        }
+                        
                         CGPoint point = CGPointMake(0, showInViewSize.height);
-                        CGPoint keyPoint = [showInView.superview convertPoint:point toView:[UIApplication sharedApplication].keyWindow];
+                        CGPoint keyPoint = point;
+                        if (showInView.superview) {
+                            keyPoint = [showInView.superview convertPoint:point toView:[UIApplication sharedApplication].keyWindow];
+                        }
                         CGFloat diffHeight = keyPoint.y - CGRectGetMaxY(SAFE_FRAME);
                         if (diffHeight > 0) {
                             [cell changeSubViewFrame:[cell getCellSubViewFrameForCellSize:CGSizeMake(width, height)]];
@@ -1269,6 +1276,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     }
     else if (YZHUIALERT_VIEW_STYLE_IS_SHEET(self.alertViewStyle))
     {
+        self.layer.cornerRadius = 0;
         CGFloat totalHeight = self.bounds.size.height;
         if ([self _haveTransformYAnimated]) {
             [UIView animateWithDuration:self.animateDuration animations:^{
@@ -1282,6 +1290,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     }
     else if (YZHUIALERT_VIEW_STYLE_IS_TIPS(self.alertViewStyle))
     {
+        self.layer.cornerRadius = 0;
         if ([self _haveTransformYAnimated]) {
             [UIView animateWithDuration:self.animateDuration delay:0 usingSpringWithDamping:0.45 initialSpringVelocity:8 options:UIViewAnimationOptionCurveEaseInOut animations:^{
                 self.transform = CGAffineTransformMakeTranslation(0, TOP_ALERT_VIEW_MIN_HEIGHT);

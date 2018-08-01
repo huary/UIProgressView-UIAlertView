@@ -190,6 +190,8 @@ typedef void(^YZHUIAlertActionBlock)(YZHAlertActionModel *actionModel, NSDiction
 @property (nonatomic, assign) CGFloat cellHeadMessageHeight;
 //如果是竖线，此值就是宽度，这个值其实就是线的”宽度“ lineWidth
 @property (nonatomic, assign) CGFloat cellSeparatorLineWidth;
+//Title和Message直接是否允许有SeparatorLineWidth，default is NO
+@property (nonatomic, assign) BOOL cellHeadTitleMessageHaveSeparatorLine;
 
 //color
 @property (nonatomic, copy) UIColor *cellBackgroundColor;
