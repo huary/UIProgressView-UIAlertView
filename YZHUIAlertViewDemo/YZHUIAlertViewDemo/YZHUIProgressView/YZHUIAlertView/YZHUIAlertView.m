@@ -314,10 +314,11 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     }
     else
     {
+        BOOL dismiss = YES;
         if (self.actionModel && self.actionModel.actionBlock) {
-            self.actionModel.actionBlock(self.actionModel,[self.alertView getAllAlertActionCellInfo]);
+            dismiss = self.actionModel.actionBlock(self.actionModel,[self.alertView getAllAlertActionCellInfo]);
         }
-        if (!self.actionModel.actionAfterStillShow) {
+        if (dismiss) {
             [self.alertView dismiss];
         }
     }
@@ -523,6 +524,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     //textColor
     self.cellTextColor = BLACK_COLOR;
     self.cellEditTextColor = BLACK_COLOR;
+    self.cellConfirmTextColor = BLACK_COLOR;
     self.cellHeadTitleTextColor = BLACK_COLOR;
     self.cellHeadMessageTextColor = BLACK_COLOR;
     
@@ -621,10 +623,13 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     if (self.alertViewStyle == YZHUIAlertViewStyleAlertForce) {
         return;
     }
+    BOOL dismiss = YES;
     if (self.coverActionBlock) {
-        self.coverActionBlock(nil, [self getAllAlertActionCellInfo]);
+        dismiss = self.coverActionBlock(nil, [self getAllAlertActionCellInfo]);
     }
-    [self dismiss];
+    if (dismiss) {
+        [self dismiss];
+    }
 }
 
 -(void)setAlertTitle:(id)alertTitle
@@ -634,14 +639,16 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
         WEAK_SELF(weakSelf);
         NSText *text = [[NSText alloc] initWithTextObj:alertTitle];
         if (IS_AVAILABLE_NSSTRNG(text.text)) {
-            [self addAlertActionWithoutCheckWithTitle:alertTitle actionStyle:YZHUIAlertActionStyleHeadTitle actionBlock:^(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {
+            [self addAlertActionWithoutCheckWithTitle:alertTitle actionStyle:YZHUIAlertActionStyleHeadTitle actionBlock:^BOOL(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {
                 [weakSelf endEditing:YES];
+                return YES;
             }];
         }
         else if (text.attributedText)
         {
-            [self addAlertActionWithoutCheckWithTitle:alertTitle actionStyle:YZHUIAlertActionStyleHeadTitle actionBlock:^(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {
+            [self addAlertActionWithoutCheckWithTitle:alertTitle actionStyle:YZHUIAlertActionStyleHeadTitle actionBlock:^BOOL(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {
                 [weakSelf endEditing:YES];
+                return YES;
             }];
         }
     }
@@ -655,14 +662,16 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
         
         NSText *text = [[NSText alloc] initWithTextObj:alertMessage];
         if (IS_AVAILABLE_NSSTRNG(text.text)) {
-            [self addAlertActionWithoutCheckWithTitle:alertMessage actionStyle:YZHUIAlertActionStyleHeadMessage actionBlock:^(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {
+            [self addAlertActionWithoutCheckWithTitle:alertMessage actionStyle:YZHUIAlertActionStyleHeadMessage actionBlock:^BOOL(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {
                 [weakSelf endEditing:YES];
+                return YES;
             }];
         }
         else if (text.attributedText)
         {
-            [self addAlertActionWithoutCheckWithTitle:alertMessage actionStyle:YZHUIAlertActionStyleHeadMessage actionBlock:^(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {
+            [self addAlertActionWithoutCheckWithTitle:alertMessage actionStyle:YZHUIAlertActionStyleHeadMessage actionBlock:^BOOL(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {
                 [weakSelf endEditing:YES];
+                return YES;
             }];
         }
 
@@ -857,7 +866,12 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
                             }
                             
                             if (obj.actionStyle != YZHUIAlertActionStyleCancel && obj.actionStyle != YZHUIAlertActionStyleDestructive) {
-                                cell.textLabel.textColor = self.cellTextColor;
+                                if (obj.actionStyle == YZHUIAlertActionStyleConfirm) {
+                                    cell.textLabel.textColor = self.cellConfirmTextColor;
+                                }
+                                else {
+                                    cell.textLabel.textColor = self.cellTextColor;
+                                }
                             }
                         }
                     }
@@ -866,8 +880,8 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
                 {
                     cell.backgroundColor = self.cellBackgroundColor;
                     if (cell.textStyle != YZHUIAlertActionTextStyleAttribute) {
-                        cell.editTextField.font = self.cellTextFont;
-                        cell.editTextField.textColor = self.cellTextColor;
+                        cell.editTextField.font = self.cellEditTextFont;
+                        cell.editTextField.textColor = self.cellEditTextColor;
                         cell.editTextField.backgroundColor = self.cellEditBackgroundColor;
                     }
                     cell.editTextField.secureTextEntry = self.cellEditSecureTextEntry;

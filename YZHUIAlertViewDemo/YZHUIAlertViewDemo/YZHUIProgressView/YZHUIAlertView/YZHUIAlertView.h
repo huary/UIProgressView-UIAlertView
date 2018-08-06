@@ -88,8 +88,9 @@ typedef void(^YZHUIAlertDismissCompletionBlock)(YZHUIAlertView *alertView, BOOL 
 
 /*
  *actionCellInfo中的object 要么是YZHAlertActionModel，要么是UIView<UIAlertActionCellProtocol>的对象
+ *返回YES表示block后进行dismiss,NO表示继续停留在当前
  */
-typedef void(^YZHUIAlertActionBlock)(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo);
+typedef BOOL(^YZHUIAlertActionBlock)(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo);
 
 
 /********************************************************************************
@@ -110,8 +111,10 @@ typedef void(^YZHUIAlertActionBlock)(YZHAlertActionModel *actionModel, NSDiction
 //alertEditText是NSString或者NSAttributedString
 @property (nonatomic, strong) id alertEditText;
 
-//default is NO,点击了action后，alertview就dismiss了，如果为YES的话，则不会
-@property (nonatomic, assign) BOOL actionAfterStillShow;
+/*default is NO,点击了action后，alertview就dismiss了，如果为YES的话，则不会.
+ *这个属性去掉，通过YZHUIAlertActionBlock的返回值进行是否dismiss
+*/
+//@property (nonatomic, assign) BOOL actionAfterStillShow;
 
 //根据actionTitleTex来进行判断
 -(YZHUIAlertActionTextStyle)textStyle;
@@ -204,6 +207,7 @@ typedef void(^YZHUIAlertActionBlock)(YZHAlertActionModel *actionModel, NSDiction
 //textColor
 @property (nonatomic, copy) UIColor *cellTextColor;
 @property (nonatomic, copy) UIColor *cellEditTextColor;
+@property (nonatomic, copy) UIColor *cellConfirmTextColor;
 @property (nonatomic, copy) UIColor *cellHeadTitleTextColor;
 @property (nonatomic, copy) UIColor *cellHeadMessageTextColor;
 //only for tips
