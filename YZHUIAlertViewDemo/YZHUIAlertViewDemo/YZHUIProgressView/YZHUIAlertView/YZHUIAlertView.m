@@ -8,65 +8,78 @@
 
 #import "YZHUIAlertView.h"
 #import "NSKeyboardManager.h"
-
+#import "YZHUIButton.h"
+#import <objc/runtime.h>
 
 #define ACTION_CELL_SUBVIEW_TAG             (1234)
 
-#define TOP_ALERT_VIEW_MIN_HEIGHT           (64)
-#define TOP_ALERT_VIEW_HEIGHT               (100)
+#define TOP_ALERT_VIEW_HEIGHT               (STATUS_BAR_HEIGHT + 44)
 
-
-#if TOP_ALERT_VIEW_HEIGHT < TOP_ALERT_VIEW_MIN_HEIGHT
-#error "TOP_ALERT_VIEW_HEIGHT must be greater than TOP_ALERT_VIEW_MIN_HEIGHT(64)"
-#endif
-
-#define TOP_ALERT_VIEW_SHIFT_HEIGHT         (16)
+#define CUSTOM_CELL_VERTICAL_NEW            (1)
 
 #define YZHUIALERT_VIEW_STYLE_IS_TIPS(STYLE)    (((STYLE) == YZHUIAlertViewStyleTopInfoTips )|| ((STYLE) == YZHUIAlertViewStyleTopWarningTips))
 
 #define YZHUIALERT_VIEW_STYLE_IS_ALERT(STYLE)   (((STYLE) == YZHUIAlertViewStyleAlertInfo )|| ((STYLE) == YZHUIAlertViewStyleAlertEdit) || ((STYLE) == YZHUIAlertViewStyleAlertForce))
+
 #define YZHUIALERT_VIEW_STYLE_IS_SHEET(STYLE)   ((STYLE) == YZHUIAlertViewStyleActionSheet)
 
 #define YZHUIALERT_ACTION_STYLE_IS_HEAD(ACTION_STYLE)   ((ACTION_STYLE) == YZHUIAlertActionStyleHeadTitle || (ACTION_STYLE) == YZHUIAlertActionStyleHeadMessage)
 
-#define YZHUIALERT_ACTION_STYLE_IS_SHEET_SUPPORT(ACTION_STYLE)  ((!YZHUIALERT_ACTION_STYLE_IS_HEAD(ACTION_STYLE)) && (ACTION_STYLE) != YZHUIAlertActionStyleCancel && (ACTION_STYLE) != YZHUIAlertActionStyleTextEdit)
+#define YZHUIALERT_ACTION_STYLE_IS_INFO_SUPPORT(ACTION_STYLE) ((!YZHUIALERT_ACTION_STYLE_IS_HEAD(ACTION_STYLE)) && (ACTION_STYLE) != YZHUIAlertActionStyleTextEdit && (ACTION_STYLE) != YZHUIAlertActionStyleTextViewWrite && (ACTION_STYLE) != YZHUIAlertActionStyleTextViewRW)
 
-#define YZHUIALERT_ACTION_STYLE_CAN_LAYOUT(ACTION_STYLE)        ((ACTION_STYLE) == YZHUIAlertActionStyleCancel || (ACTION_STYLE) == YZHUIAlertActionStyleConfirm || (ACTION_STYLE) == YZHUIAlertActionStyleDestructive)
+#define YZHUIALERT_ACTION_STYLE_IS_SHEET_SUPPORT(ACTION_STYLE)  ((!YZHUIALERT_ACTION_STYLE_IS_HEAD(ACTION_STYLE)) /*&& (ACTION_STYLE) != YZHUIAlertActionStyleCancel && (ACTION_STYLE) != YZHUIAlertActionStyleTextEdit*/)
+
+#define YZHUIALERT_ACTION_STYLE_CAN_LAYOUT(ACTION_STYLE)        (TYPE_AND(ACTION_STYLE,YZHUIAlertActionStyleMask) == YZHUIAlertActionStyleCancel || TYPE_AND(ACTION_STYLE,YZHUIAlertActionStyleMask) == YZHUIAlertActionStyleConfirm || TYPE_AND(ACTION_STYLE,YZHUIAlertActionStyleMask) == YZHUIAlertActionStyleDestructive)
 
 #define YZHUIALERT_ACTION_STYLE_SHOULD_LAYOUT(ACTION_STYLE,LAYOUT_STYLE)     (YZHUIALERT_ACTION_STYLE_CAN_LAYOUT(ACTION_STYLE) && (LAYOUT_STYLE) == YZHUIAlertActionCellLayoutStyleHorizontal)
 
-#define USE_KEYBOARD_MANAGER                    (1)
+#define YZHUIALERT_ACTION_STYLE_IS_TEXTVIEW(ACTION_STYLE)   ((ACTION_STYLE) == YZHUIAlertActionStyleTextViewRead || (ACTION_STYLE) == YZHUIAlertActionStyleTextViewWrite || (ACTION_STYLE) == YZHUIAlertActionStyleTextViewRW)
 
 static const CGFloat defaultYZHUIAlertViewStyleAlertAnimateDuration             = 0.8;
 static const CGFloat defaultYZHUIAlertViewStyleTopTipsAnimateDuration           = 0.3;
 static const CGFloat defaultYZHUIAlertViewStyleActionSheetAnimateDuration       = 0.3;
-//static const CGFloat defaultYZHUIAlertViewStyleCustomViewAnimateDuration        = 0.3;
 
+static const CGFloat UIAlertViewWidthWithScreenWidthRatio                       = 0.7;
+static const CGFloat UIAlertViewLandscapeWidthWithScreenWidthRatio              = 0.4;
+static const UIEdgeInsets defaultYZHUIAlertViewSubViewEdgeInsets                = {.top=10,.left=10,.bottom=10,.right=10};
+static const CGFloat defaultYZHUIAlertViewCellHeight                            = 50;
+static const CGFloat defaultYZHUIAlertViewHeadTitleHeight                       = 50;//55;
+static const CGFloat defaultYZHUIAlertViewHeadMessageHeight                     = 50;
+static const CGFloat defaultYZHUIAlertViewCellTextViewHeight                    = 80;
+static const CGFloat defaultYZHUIAlertViewCellSeparatorLineWidth                = 1.0;
 
-static const CGFloat UIAlertViewWidthWithScreenWidthRatio           = 0.7;
-static const CGFloat UIAlertViewLandscapeWidthWithScreenWidthRatio  = 0.4;
-static const CGFloat UIAlertViewTextFieldWidthWithBaseWidthRatio    = 0.9;
-static const CGFloat UIAlertViewTextFieldHeightWithBaseHeightRatio  = 0.8;
-static const CGFloat defaultYZHUIAlertViewCellHeight                = 50;
-static const CGFloat defaultYZHUIAlertViewHeadTitleHeight           = 50;//55;
-static const CGFloat defaultYZHUIAlertViewHeadMessageHeight         = 50;
-static const CGFloat defaultYZHUIAlertViewCellSeparatorLineWidth    = 1.0;
-
-static const CGFloat defaultYZHUIAlertViewCellTextFontSize              = 16.0;
-static const CGFloat defaultYZHUIAlertViewCellHeadTitleTextFontSize     = 18.0;
-static const CGFloat defaultYZHUIAlertViewCellHeadMessageTextFontSize   = 16.0;
+static const CGFloat defaultYZHUIAlertViewCellTextFontSize                      = 16.0;
+static const CGFloat defaultYZHUIAlertViewCellHeadTitleTextFontSize             = 18.0;
+static const CGFloat defaultYZHUIAlertViewCellHeadMessageTextFontSize           = 16.0;
 
 static const CGFloat defaultYZHUIAlertViewCellCancelConfirmDestructiveTextFontSize     = 18.0;
 
-static const CGFloat defaultYZHUIAlertViewCoverAlpha                    = 0.1;
+static const CGFloat defaultYZHUIAlertViewCoverAlpha                            = 0.1;
 
-static const CGFloat defaultYZHUIAlertViewSheetCancelCellTopLineWidth   = 8.0;
+static const CGFloat defaultYZHUIAlertViewSheetCancelCellTopLineWidth           = 8.0;
 
-typedef NS_ENUM(NSInteger, YZHUIAlertTipsStyleSubViewTag)
+/********************************************************************************
+ * UIView (RowIndex)
+ ********************************************************************************/
+@interface UIView (YZHUIAlertActionCellRowIndex)
+
+@property (nonatomic, assign) NSInteger rowIndex;
+
+@end
+
+@implementation UIView (YZHUIAlertActionCellRowIndex)
+
+-(void)setRowIndex:(NSInteger)rowIndex
 {
-    YZHUIAlertTipsStyleSubViewTagImageView = 1,
-    YZHUIAlertTipsStyleSubViewTagLabelView = 2,
-};
+    objc_setAssociatedObject(self, @selector(rowIndex), @(rowIndex), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+-(NSInteger)rowIndex
+{
+    return [objc_getAssociatedObject(self, _cmd) integerValue];
+}
+
+@end
 
 /********************************************************************************
  *NSText
@@ -107,6 +120,7 @@ typedef NS_ENUM(NSInteger, YZHUIAlertTipsStyleSubViewTag)
 /********************************************************************************
  *YZHAlertActionModel
  ********************************************************************************/
+
 @implementation YZHAlertActionModel
 
 -(YZHUIAlertActionTextStyle)textStyle
@@ -125,21 +139,6 @@ typedef NS_ENUM(NSInteger, YZHUIAlertTipsStyleSubViewTag)
         return YZHUIAlertActionTextStyleNull;
     }
 }
-
-//-(NSText*)actionTitleTextToNSText
-//{
-//    YZHUIAlertActionTextStyle textStyle = self.textStyle;
-//    NSText *text = [[NSText alloc] init];
-//    if (textStyle == YZHUIAlertActionTextStyleNormal) {
-//        text.text = (NSString*)self.actionTitleText;
-//    }
-//    else if (textStyle == YZHUIAlertActionTextStyleAttribute)
-//    {
-//        text.attributedText = (NSAttributedString*)self.actionTitleText;
-//    }
-//    return text;
-//}
-
 @end
 
 typedef NS_ENUM(NSInteger, NSAlertActionCellType)
@@ -147,31 +146,47 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     NSAlertActionCellTypeTextLabel  = 0,
     NSAlertActionCellTypeTextField  = 1,
     NSAlertActionCellTypeCustomView = 2,
+    NSAlertActionCellTypeTextView   = 3,
 };
 
 
 /********************************************************************************
  *YZHUIAlertActionCell
  ********************************************************************************/
+@class YZHUIAlertActionCell;
+typedef void(^YZHUIAlertActionCellContentViewChangeSizeBlock)(YZHUIAlertActionCell *actionCell);
+
 @interface YZHUIAlertActionCell : UIControl <UIAlertActionCellProtocol>
 
 @property (nonatomic, assign, readonly) NSAlertActionCellType cellType;
 
-@property (nonatomic, strong, readonly) UILabel *textLabel;
-@property (nonatomic, strong, readonly) UITextField *editTextField;
 @property (nonatomic, strong, readonly) UIView *customView;
-
-@property (nonatomic, assign) YZHUIAlertActionTextStyle textStyle;
 
 @property (nonatomic, copy, readonly) UIColor *normalColor;
 @property (nonatomic, copy) UIColor *highlightColor;
 
-@property (nonatomic, assign) CGRect cellFrame;
-@property (nonatomic, assign, readonly) CGSize cellMaxSize;
-@property (nonatomic, assign, readonly) NSInteger cellIndex;
 @property (nonatomic, strong) YZHAlertActionModel *actionModel;
 
 @property (nonatomic, weak) YZHUIAlertView *alertView;
+
+@property (nonatomic, assign) UIEdgeInsets edgeInsets;
+
+//contentView正常显示时的大小
+@property (nonatomic, assign) CGSize contentViewNMSize;
+//contentView最大显示大小
+@property (nonatomic, assign) CGSize contentViewMaxSize;
+/* <#注释#> */
+@property (nonatomic, copy) YZHUIAlertActionCellContentViewChangeSizeBlock contentViewSizeChangeBlock;
+
+
+#pragma mark UIAlertActionCellProtocol
+@property (nonatomic, assign) CGRect cellFrame;
+@property (nonatomic, assign, readonly) CGSize cellMaxSize;
+@property (nonatomic, assign, readonly) NSInteger cellIndex;
+
+@property (nonatomic, strong, readonly) UILabel *textLabel;
+@property (nonatomic, strong, readonly) UITextView *textView;
+@property (nonatomic, strong, readonly) UITextField *editTextField;
 
 //这里传进来的frame中的size是alertCell最大可以的size
 -(instancetype)initWithAlertActionModel:(YZHAlertActionModel*)actionModel cellFrame:(CGRect)cellFrame atCellIndex:(NSInteger)cellIndex;
@@ -184,14 +199,29 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
 {
     self = [super init];
     if (self) {
-        _cellIndex = -1;
+        [self _setupDefaultValue];
     }
     return self;
 }
 
+-(instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self _setupDefaultValue];
+    }
+    return self;
+}
+
+-(void)_setupDefaultValue
+{
+    _cellIndex = -1;
+    _edgeInsets = defaultYZHUIAlertViewSubViewEdgeInsets;
+}
+
 -(instancetype)initWithAlertActionModel:(YZHAlertActionModel*)actionModel cellFrame:(CGRect)cellFrame atCellIndex:(NSInteger)cellIndex
 {
-    self = [super init];
+    self = [self init];
     if (self) {
         _cellFrame = CGRectMake(cellFrame.origin.x, cellFrame.origin.y, cellFrame.size.width-cellFrame.origin.x, cellFrame.size.height);
         _cellMaxSize = cellFrame.size;
@@ -211,7 +241,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     headLabel.textAlignment = NSTextAlignmentCenter;
     headLabel.tag = ACTION_CELL_SUBVIEW_TAG;
     headLabel.numberOfLines = 0;
-    if (self.textStyle == YZHUIAlertActionTextStyleAttribute) {
+    if (actionModel.textStyle == YZHUIAlertActionTextStyleAttribute) {
         headLabel.attributedText = actionModel.actionTitleText;
     }
     else
@@ -236,7 +266,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     infoCell.tag = ACTION_CELL_SUBVIEW_TAG;
     infoCell.numberOfLines = 0;
 
-    if (self.textStyle == YZHUIAlertActionTextStyleAttribute) {
+    if (actionModel.textStyle == YZHUIAlertActionTextStyleAttribute) {
         infoCell.attributedText = actionModel.actionTitleText;
     }
     else
@@ -272,7 +302,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     UITextField *editCell = [[UITextField alloc] init];
     editCell.tag = ACTION_CELL_SUBVIEW_TAG;
 
-    if (self.textStyle == YZHUIAlertActionTextStyleAttribute) {
+    if (actionModel.textStyle == YZHUIAlertActionTextStyleAttribute) {
         editCell.attributedPlaceholder = actionModel.actionTitleText;
     }
     else
@@ -284,9 +314,62 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     return editCell;
 }
 
+-(YZHUITextView*)_createAlertTextViewCellWithActionModel:(YZHAlertActionModel*)actionModel
+{
+    if (!YZHUIALERT_ACTION_STYLE_IS_TEXTVIEW(actionModel.actionStyle)) {
+        return nil;
+    }
+    YZHUITextView *textView = [[YZHUITextView alloc] init];
+    textView.tag = ACTION_CELL_SUBVIEW_TAG;
+    textView.editable = YES;
+    
+    if (actionModel.actionStyle == YZHUIAlertActionStyleTextViewRead || actionModel.actionStyle == YZHUIAlertActionStyleTextViewRW) {
+        if (actionModel.textStyle == YZHUIAlertActionTextStyleAttribute) {
+            textView.attributedText = actionModel.actionTitleText;
+        }
+        else
+        {
+            textView.text = actionModel.actionTitleText;
+        }
+        if (actionModel.actionStyle == YZHUIAlertActionStyleTextViewRead) {
+            textView.editable = NO;
+        }
+    }
+    else if (actionModel.actionStyle == YZHUIAlertActionStyleTextViewWrite) {
+        if (actionModel.textStyle == YZHUIAlertActionTextStyleAttribute) {
+            textView.attributedPlaceholder = actionModel.actionTitleText;
+        }
+        else
+        {
+            textView.placeholder = actionModel.actionTitleText;
+        }
+    }
+    [self addSubview:textView];
+    WEAK_SELF(weakSelf);
+    textView.contentSizeChangeBlock = ^(YZHUITextView *textView, CGSize lastContentSize) {
+        [weakSelf _changeTextViewSizeAction:textView];
+    };
+    return textView;
+}
+
+-(void)_changeTextViewSizeAction:(YZHUITextView *)textView
+{
+    CGRect frame = self.frame;
+    if (CGRectIsEmpty(frame)) {
+        return;
+    }
+//    CGSize contentSize = [textView sizeThatFits:textView.contentSize];//textView.contentSize;
+    CGSize contentSize = textView.contentSize;
+    
+    CGFloat w = textView.bounds.size.width;
+    CGFloat h = contentSize.height;
+    
+    [self updateAlertActionCellContentViewSize:CGSizeMake(w, h)];
+}
+
 -(UIView*)_createAlertCustomCellWithActionModel:(YZHAlertActionModel*)actionModel
 {
-    if (actionModel.actionStyle != YZHUIAlertActionStyleCustomView) {
+    if (!TYPE_AND(actionModel.actionStyle, YZHUIAlertActionStyleCustomMask)) {
         return nil;
     }
     if (!actionModel.customCellBlock) {
@@ -297,9 +380,6 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     [self addSubview:customView];
     
     [self addTarget:self action:@selector(_controlAction:) forControlEvents:UIControlEventTouchUpInside];
-//    if (actionModel.actionBlock) {
-//        [self addTarget:self action:@selector(_controlAction:) forControlEvents:UIControlEventTouchUpInside];
-//    }
     
     return customView;
 }
@@ -339,10 +419,15 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
         _editTextField = [self _createAlertEditCellWithActionModel:actionModel];
         _cellType = NSAlertActionCellTypeTextField;
     }
-    else if (actionModel.actionStyle == YZHUIAlertActionStyleCustomView)
+    else if (TYPE_AND(actionModel.actionStyle, YZHUIAlertActionStyleCustomMask))
     {
         _customView = [self _createAlertCustomCellWithActionModel:actionModel];
         _cellType = NSAlertActionCellTypeCustomView;
+        _edgeInsets = UIEdgeInsetsZero;
+    }
+    else if (YZHUIALERT_ACTION_STYLE_IS_TEXTVIEW(actionModel.actionStyle)) {
+        _textView = [self _createAlertTextViewCellWithActionModel:actionModel];
+        _cellType = NSAlertActionCellTypeTextView;
     }
     else
     {
@@ -354,7 +439,6 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
 -(void)setActionModel:(YZHAlertActionModel *)actionModel
 {
     _actionModel = actionModel;
-    self.textStyle = actionModel.textStyle;
     [self _createAlertActionViewForActionModel:actionModel];
 }
 
@@ -366,36 +450,90 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     UIView *subView = [self viewWithTag:ACTION_CELL_SUBVIEW_TAG];
     CGRect frame = self.frame;
     
-    CGRect newFrame = [self getCellSubViewFrameForCellSize:frame.size];
+    CGRect newFrame = [self getCellContentFrameForCellSize:frame.size];
     
-    if (self.actionModel.actionStyle == YZHUIAlertActionStyleTextEdit) {
-        subView.frame = newFrame;
-    }
-    else if (self.actionModel.actionStyle == YZHUIAlertActionStyleCustomView)
+    if (TYPE_AND(self.actionModel.actionStyle, YZHUIAlertActionStyleCustomMask))
     {
 //        subView.frame = self.bounds;
     }
     else
     {
-        if (CGRectIsEmpty(subView.frame)) {
-            subView.frame = newFrame;
-        }
+        subView.frame = newFrame;
     }
 }
 
--(CGRect)getCellSubViewFrameForCellSize:(CGSize)cellSize
+-(CGRect)getCellContentFrameForCellSize:(CGSize)cellSize
 {
-    CGFloat width = cellSize.width * UIAlertViewTextFieldWidthWithBaseWidthRatio;
-    CGFloat height = cellSize.height * UIAlertViewTextFieldHeightWithBaseHeightRatio;
-    CGFloat x = (cellSize.width - width)/2;
-    CGFloat y = (cellSize.height - height)/2;
-    return CGRectMake(x, y, width, height);
+    UIEdgeInsets edgeInsets = self.edgeInsets;
+    CGFloat x = edgeInsets.left;
+    CGFloat y = edgeInsets.top;
+    CGFloat w = cellSize.width - edgeInsets.left - edgeInsets.right;
+    CGFloat h = cellSize.height - edgeInsets.top - edgeInsets.bottom;
+    
+    w = MAX(w, 0);
+    h = MAX(h, 0);
+    
+    return CGRectMake(x, y, w, h);
 }
 
--(void)changeSubViewFrame:(CGRect)frame
+-(CGSize)getCellSizeForCellContentSize:(CGSize)cellContentSize
 {
-    UIView *subView = [self viewWithTag:ACTION_CELL_SUBVIEW_TAG];
-    subView.frame = frame;
+    UIEdgeInsets edgeInsets = self.edgeInsets;
+    CGFloat w = edgeInsets.left + cellContentSize.width + edgeInsets.right;
+    CGFloat h = edgeInsets.top + cellContentSize.height + edgeInsets.bottom;
+    return CGSizeMake(w, h);
+}
+
+-(CGSize)getCellLabelFitSizeForCellMaxSize:(CGSize)cellMaxSize
+{
+    CGSize size = [self getCellContentFrameForCellSize:cellMaxSize].size;
+    CGSize labelSize = [self.textLabel sizeThatFits:size];
+    CGFloat w = cellMaxSize.width;
+    CGFloat h = labelSize.height + self.edgeInsets.top + self.edgeInsets.bottom;
+    return CGSizeMake(w, h);
+}
+
+-(void)adjustCellContentEdgeInsetsWithCellContentSize:(CGSize)cellContentSize cellSize:(CGSize)cellSize
+{
+    if (self.cellType == NSAlertActionCellTypeCustomView) {
+        self.edgeInsets = UIEdgeInsetsZero;
+        return;
+    }
+    CGSize size = [self getCellContentFrameForCellSize:cellSize].size;
+    UIEdgeInsets edgeInsets = self.edgeInsets;
+    if (cellContentSize.width < size.width) {
+        edgeInsets.left = edgeInsets.right = (cellSize.width - cellContentSize.width)/2;
+    }
+    if (cellContentSize.height < size.height) {
+        edgeInsets.top = edgeInsets.bottom = (cellSize.height - cellContentSize.height)/2;
+    }
+    self.edgeInsets = edgeInsets;
+}
+
+//更新contentView的size
+-(void)updateAlertActionCellContentViewSize:(CGSize)contentSize
+{
+    if (CGSizeEqualToSize(self.contentViewMaxSize, CGSizeZero)) {
+        return;
+    }
+    if (self.contentViewMaxSize.height < self.contentViewNMSize.height) {
+        return;
+    }
+    CGRect frame = self.frame;
+    CGFloat height = MAX(contentSize.height, self.contentViewNMSize.height);
+    height = MIN(height, self.contentViewMaxSize.height);
+    CGFloat cellHeight = height + self.edgeInsets.top + self.edgeInsets.bottom;
+    CGFloat cellWidth = frame.size.width;
+    
+    [self adjustCellContentEdgeInsetsWithCellContentSize:CGSizeMake(contentSize.width, height) cellSize:CGSizeMake(cellWidth, cellHeight)];
+
+    if (cellHeight != frame.size.height) {
+        frame.size.height = cellHeight;
+        self.frame = frame;
+        if (self.contentViewSizeChangeBlock) {
+            self.contentViewSizeChangeBlock(self);
+        }
+    }
 }
 
 #pragma mark override
@@ -441,20 +579,30 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
 //effectview
 @property (nonatomic, strong) UIView *effectView;
 
+// tipsButton
+@property (nonatomic, strong) YZHUIButton *tipsButton;
+
+// tipsBottomLine
+@property (nonatomic, strong) UIView *tipsBottomLine;
+
 //alertviewStyle
 @property (nonatomic, assign) YZHUIAlertViewStyle alertViewStyle;
 
 @property (nonatomic, strong) id alertTitle;
 @property (nonatomic, strong) id alertMessage;
 
-@property (nonatomic, strong) NSMutableArray *actionModels;
+@property (nonatomic, strong) NSMutableArray<YZHAlertActionModel*> *actionModels;
 
 //YZHUIAlertViewStyleActionSheet
-@property (nonatomic, strong) YZHAlertActionModel *cancelModel;
+@property (nonatomic, strong) YZHAlertActionModel *sheetCancelModel;
+@property (nonatomic, strong) YZHAlertActionModel *sheetConfirmModel;
 
 @property (nonatomic, assign) BOOL isCreate;
 
 @property (nonatomic, strong) NSKeyboardManager *keyboardManager;
+
+/* <#注释#> */
+@property (nonatomic, strong) NSMutableArray<UIView*> *contentSubViews;
 
 @end
 
@@ -483,6 +631,9 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
 
 -(UIView*)effectView
 {
+    if (YZHUIALERT_VIEW_STYLE_IS_TIPS(self.alertViewStyle)) {
+        return nil;
+    }
     if (_effectView == nil) {
         if (SYSTEMVERSION_NUMBER > 8.0) {
             UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
@@ -511,6 +662,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     self.cellHeight = defaultYZHUIAlertViewCellHeight;
     self.cellHeadTitleHeight = defaultYZHUIAlertViewHeadTitleHeight;
     self.cellHeadMessageHeight = defaultYZHUIAlertViewHeadMessageHeight;
+    self.cellTextViewHeight = defaultYZHUIAlertViewCellTextViewHeight;
     self.cellSeparatorLineWidth = defaultYZHUIAlertViewCellSeparatorLineWidth/SCREEN_SCALE;
     
     //color
@@ -580,17 +732,19 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     else if (YZHUIALERT_VIEW_STYLE_IS_TIPS(self.alertViewStyle))
     {
         self.backgroundColor = WHITE_COLOR;
-        UILabel *label = [[UILabel alloc] init];
-        label.tag = YZHUIAlertTipsStyleSubViewTagLabelView;
-        label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        label.textAlignment = NSTextAlignmentCenter;
-        label.numberOfLines = 0;
-        [self addSubview:label];
         
-        UIImageView *imageView = [[UIImageView alloc] init];
-        imageView.tag = YZHUIAlertTipsStyleSubViewTagImageView;
-        imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        [self addSubview:imageView];
+        YZHUIButton *tipsButton = [YZHUIButton buttonWithType:UIButtonTypeCustom];
+        tipsButton.layoutStyle = NSButtonLayoutStyleLR | NSButtonLayoutStyleCustomSpace;
+        tipsButton.imageTitleSpace = 10;
+        tipsButton.userInteractionEnabled = NO;
+        tipsButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [self addSubview:tipsButton];
+        self.tipsButton = tipsButton;
+        
+        UIView *tipsBottomLine = [UIView new];
+        tipsBottomLine.backgroundColor = SINGLE_LINE_COLOR;
+        [self addSubview:tipsBottomLine];
+        self.tipsBottomLine = tipsBottomLine;
     }
     else if (YZHUIALERT_VIEW_STYLE_IS_ALERT(self.alertViewStyle))
     {
@@ -636,17 +790,11 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
 {
     _alertTitle = alertTitle;
     if (alertTitle) {
-        WEAK_SELF(weakSelf);
+        
         NSText *text = [[NSText alloc] initWithTextObj:alertTitle];
-        if (IS_AVAILABLE_NSSTRNG(text.text)) {
-            [self addAlertActionWithoutCheckWithTitle:alertTitle actionStyle:YZHUIAlertActionStyleHeadTitle actionBlock:^BOOL(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {
-                [weakSelf endEditing:YES];
-                return YES;
-            }];
-        }
-        else if (text.attributedText)
-        {
-            [self addAlertActionWithoutCheckWithTitle:alertTitle actionStyle:YZHUIAlertActionStyleHeadTitle actionBlock:^BOOL(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {
+        if (IS_AVAILABLE_NSSTRNG(text.text) || IS_AVAILABLE_ATTRIBUTEDSTRING(text.attributedText)) {
+            WEAK_SELF(weakSelf);
+            [self _addAlertActionWithoutCheckWithTitle:alertTitle actionStyle:YZHUIAlertActionStyleHeadTitle actionBlock:^BOOL(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {
                 [weakSelf endEditing:YES];
                 return YES;
             }];
@@ -658,23 +806,14 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
 {
     _alertMessage = alertMessage;
     if (alertMessage) {
-        WEAK_SELF(weakSelf);
-        
         NSText *text = [[NSText alloc] initWithTextObj:alertMessage];
-        if (IS_AVAILABLE_NSSTRNG(text.text)) {
-            [self addAlertActionWithoutCheckWithTitle:alertMessage actionStyle:YZHUIAlertActionStyleHeadMessage actionBlock:^BOOL(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {
+        if (IS_AVAILABLE_NSSTRNG(text.text) || IS_AVAILABLE_ATTRIBUTEDSTRING(text.attributedText)) {
+            WEAK_SELF(weakSelf);
+            [self _addAlertActionWithoutCheckWithTitle:alertMessage actionStyle:YZHUIAlertActionStyleHeadMessage actionBlock:^BOOL(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {
                 [weakSelf endEditing:YES];
                 return YES;
             }];
         }
-        else if (text.attributedText)
-        {
-            [self addAlertActionWithoutCheckWithTitle:alertMessage actionStyle:YZHUIAlertActionStyleHeadMessage actionBlock:^BOOL(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {
-                [weakSelf endEditing:YES];
-                return YES;
-            }];
-        }
-
     }
 }
 
@@ -698,52 +837,27 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     }
 }
 
-/*如果为横线，则size为（width，0）
- *如果为竖线，则size为（0， height）
- */
--(CAShapeLayer*)_createAlertSeparatorLineWithSize:(CGSize)size lineWidth:(CGFloat)lineWidth lineColor:(UIColor*)lineColor
+-(UIView*)_createSeparatorLineWithFrame:(CGRect)frame lineColor:(UIColor*)lineColor
 {
-    UIBezierPath *linePath = [UIBezierPath bezierPath];
-    [linePath moveToPoint:CGPointZero];
-    if (size.width > 0) {
-        [linePath addLineToPoint:CGPointMake(size.width, 0)];
-    }
-    else
-    {
-        [linePath addLineToPoint:CGPointMake(0, size.height)];
-    }
-    CAShapeLayer *lineLayer = [CAShapeLayer layer];
-    lineLayer.lineWidth = lineWidth;//self.cellSeparatorHeight;
-    lineLayer.path = linePath.CGPath;
-    lineLayer.strokeColor= lineColor.CGColor;//self.cellSeparatorColor.CGColor;
-    return lineLayer;
-}
-
--(CALayer*)_createSeparatorLineWithFrame:(CGRect)frame lineColor:(UIColor*)lineColor
-{
-    CALayer *lineLayer = [[CALayer alloc] init];
-    lineLayer.frame = frame;
-    lineLayer.backgroundColor = lineColor.CGColor;
-    return lineLayer;
+    UIView *line = [UIView new];
+    line.frame = frame;
+    line.backgroundColor = lineColor;
+    
+    return line;
 }
 
 -(void)_addLayoutActionForFoce
 {
     if (self.alertViewStyle == YZHUIAlertViewStyleAlertForce) {
         __block BOOL needToAdd = YES;
-//        __block BOOL isAllEdit = YES;
         [self.actionModels enumerateObjectsUsingBlock:^(YZHAlertActionModel * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if (!YZHUIALERT_ACTION_STYLE_IS_HEAD(obj.actionStyle))
+            if (YZHUIALERT_ACTION_STYLE_CAN_LAYOUT(obj.actionStyle))
             {
-//                if (obj.actionStyle != YZHUIAlertActionStyleTextEdit) {
-//                    isAllEdit = NO;
-//                }
-                if (YZHUIALERT_ACTION_STYLE_CAN_LAYOUT(obj.actionStyle)) {
-                    needToAdd = NO;
-                }
+                needToAdd = NO;
+                *stop = YES;
             }
         }];
-        if (needToAdd /*&& isAllEdit*/) {
+        if (needToAdd) {
             NSInteger index = self.actionModels.count;
             NSString *cancelId = [NSString stringWithFormat:@"%@",@(index)];
             NSString *confirmId = [NSString stringWithFormat:@"%@",@(index+1)];
@@ -759,26 +873,41 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     [super layoutSubviews];
     
     CGSize size = self.bounds.size;
-    CGSize showInViewSize = self.showInView.bounds.size;
     if (self.customContentAlertView) {
         self.customContentAlertView.frame = CGRectMake(0, 0, size.width, size.height);
     }
-    
-    CGFloat contentHeight = size.height;
-    if (YZHUIALERT_VIEW_STYLE_IS_ALERT(self.alertViewStyle)) {
-        self.effectView.frame = self.bounds;
-    }
-    else if (YZHUIALERT_VIEW_STYLE_IS_SHEET(self.alertViewStyle))
-    {
-        
-        self.frame = CGRectMake(0, showInViewSize.height - contentHeight, showInViewSize.width, contentHeight);
-        self.effectView.frame = self.bounds;
-    }
+    self.effectView.frame = self.bounds;
 }
 
 -(BOOL)_haveTransformYAnimated
 {
     return self.animateDuration > 0;
+}
+
+-(CGFloat)_adjustSheetCellHeightForCell:(YZHUIAlertActionCell*)cell cellSize:(CGSize)cellSize
+{
+    CGPoint point = CGPointMake(0, self.showInView.frame.size.height);
+    CGPoint keyPoint = point;
+    if (self.showInView.superview) {
+        keyPoint = [self.showInView.superview convertPoint:point toView:[UIApplication sharedApplication].keyWindow];
+    }
+    CGFloat cellHeight = cellSize.height;
+    CGFloat diffHeight = keyPoint.y - CGRectGetMaxY(SAFE_FRAME);
+    if (diffHeight > 0) {
+        UIEdgeInsets insets = cell.edgeInsets;
+        insets.bottom += diffHeight;
+        cell.edgeInsets = insets;
+        cellHeight += diffHeight;
+    }
+    return cellHeight;
+}
+
+-(NSMutableArray<UIView*>*)contentSubViews
+{
+    if (_contentSubViews == nil) {
+        _contentSubViews = [NSMutableArray array];
+    }
+    return _contentSubViews;
 }
 
 -(void)_createAlertActionCellWithShowInView:(UIView*)showInView;
@@ -816,8 +945,11 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
         }
         __block CGFloat totalY = 0;
         __block CGFloat totalX = 0;
-        __block CGFloat cTotalX = 0;
         __block CGFloat lastY = 0;
+#if !CUSTOM_CELL_VERTICAL_NEW
+        __block CGFloat cTotalX = 0;
+        __block CGFloat cLastY = 0;
+#endif
         
         CGFloat cellHeight = self.cellHeight;
         CGFloat headTitleHeight = self.cellHeadTitleHeight;
@@ -826,8 +958,12 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
         UIColor *lineColor = self.cellSeparatorLineColor;
         
         if (self.customContentAlertView == nil) {
+            [self.contentSubViews removeAllObjects];
+            self.contentSubViews = nil;
             NSInteger cnt = self.actionModels.count;
+            __block NSInteger rowIndex = 0;
             [self.actionModels enumerateObjectsUsingBlock:^(YZHAlertActionModel *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                
                 CGRect cellFrame = CGRectMake(totalX, totalY, contentWidth, contentHeight);
                 YZHUIAlertActionCell *cell = [[YZHUIAlertActionCell alloc] initWithAlertActionModel:obj cellFrame:cellFrame atCellIndex:idx];
                 cell.alertView = self;
@@ -879,12 +1015,19 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
                 else if (cell.cellType == NSAlertActionCellTypeTextField)
                 {
                     cell.backgroundColor = self.cellBackgroundColor;
-                    if (cell.textStyle != YZHUIAlertActionTextStyleAttribute) {
-                        cell.editTextField.font = self.cellEditTextFont;
-                        cell.editTextField.textColor = self.cellEditTextColor;
-                        cell.editTextField.backgroundColor = self.cellEditBackgroundColor;
+                    cell.editTextField.font = self.cellEditTextFont;
+                    cell.editTextField.textColor = self.cellEditTextColor;
+                    cell.editTextField.backgroundColor = self.cellEditBackgroundColor;
+                    if (obj.textStyle == YZHUIAlertActionTextStyleAttribute) {
+                        cell.editTextField.defaultTextAttributes = [cell.editTextField.attributedPlaceholder attributesAtIndex:0 effectiveRange:NULL];
                     }
                     cell.editTextField.secureTextEntry = self.cellEditSecureTextEntry;
+                }
+                else if (cell.cellType == NSAlertActionCellTypeTextView) {
+                    cell.backgroundColor = self.cellBackgroundColor;
+                    cell.textView.font = self.cellEditTextFont;
+                    cell.textView.textColor = self.cellEditTextColor;
+                    cell.textView.backgroundColor = self.cellEditBackgroundColor;
                 }
                 else if (cell.cellType == NSAlertActionCellTypeCustomView)
                 {
@@ -893,10 +1036,35 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
                     }
                 }
                 
+                WEAK_SELF(weakSelf);
+                cell.contentViewSizeChangeBlock = ^(YZHUIAlertActionCell *actionCell) {
+                    [weakSelf updateAlertActionCellsLayout];
+                    if (actionCell.actionModel.cellContentViewUpdateAttributedBlock) {
+                        actionCell.actionModel.cellContentViewUpdateAttributedBlock(actionCell.actionModel, actionCell);
+                    }
+                };
+                
+                BOOL haveContentViewMaxSize = NO;
+                if (obj.cellContentViewMaxSizeAttributedBlock) {
+                    cell.contentViewMaxSize = obj.cellContentViewMaxSizeAttributedBlock(obj, cell);
+                    haveContentViewMaxSize = YES;
+                }
+                
                 CGFloat x = 0;
                 CGFloat y = totalY;
                 CGFloat width = contentWidth;
                 CGFloat height = cellHeight;
+                
+                if (obj.cellContentViewAttributedBlock) {
+                    CGSize contentSize = obj.cellContentViewAttributedBlock(obj, cell);
+                    height = contentSize.height + cell.edgeInsets.top + cell.edgeInsets.bottom;
+                    [cell adjustCellContentEdgeInsetsWithCellContentSize:contentSize cellSize:CGSizeMake(width, height)];
+                }
+                else {
+                    if (cell.cellType == NSAlertActionCellTypeTextView) {
+                        height = self.cellTextViewHeight;
+                    }
+                }
                 
                 BOOL haveBottomLine = YES;
                 BOOL haveVerticalLine = NO;
@@ -906,36 +1074,59 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
                     width = cell.cellFrame.size.width;
                     height = cell.cellFrame.size.height;
                     
-                    if (cTotalX == 0) {
-                        lastY = totalY;
+                    //这里只考虑从totalY开始新的一行，不考虑从原来的行横向后面接新的行
+#if CUSTOM_CELL_VERTICAL_NEW
+                    y = totalY;
+#else
+                    //如下考虑到上一行没有占满的情况下，下一行可以在横线后面接入新的行，不太好，也不太准，所以弃用
+                    if (width > contentWidth) {
+                        width = contentWidth;
                     }
-                    y = lastY;
-                    
-                    CGFloat totalYTmp = MAX(totalY, lastY + height);
-                    
-                    cTotalX = x + width;
-                    //如果偏移量大于contentWidth的话，则从下一行开始。
-                    if (cTotalX > contentWidth) {
+                    CGFloat cTotalXTmp = x + width;
+                    if (cTotalXTmp > contentWidth) {
                         x = 0;
                         y = totalY;
                         totalY += height;
-                        lastY = totalY;
                     }
                     else {
-                        totalY = totalYTmp;
+                        if (cTotalX == 0) {
+                            y = totalY;
+                        }
+                        else {
+                            y = cLastY;
+                        }
+                        totalY = MAX(y + height, totalY);
                     }
-                    cTotalX = 0;
+                    cTotalX = cTotalXTmp;
+                    cLastY = y;
+#endif
+                    if (YZHUIALERT_VIEW_STYLE_IS_SHEET(self.alertViewStyle) && idx + 1 == cnt) {
+                        height = [self _adjustSheetCellHeightForCell:cell cellSize:CGSizeMake(width, height)];
+                    }
+                    totalY += height;
+                    ++rowIndex;
                 }
                 else
                 {
+#if !CUSTOM_CELL_VERTICAL_NEW
+                    cTotalX = 0;
+#endif
                     CGFloat attributeCellHeight = -1;
                     if (cell.cellType == NSAlertActionCellTypeTextLabel && obj.textStyle == YZHUIAlertActionTextStyleAttribute) {
+                        /*
+                         *如下两种方法都不行，因为NSAttributedString中的font和Label中的font不一致，除非在NSAttributedString指定了所有range的font
+                        //方法1、
                         NSAttributedString *attributeString = (NSAttributedString*)obj.actionTitleText;
                         NSDictionary *dict = [attributeString attributesAtIndex:0 effectiveRange:NULL];
-                        CGSize labelSize = [attributeString.string boundingRectWithSize:CGSizeMake(width * UIAlertViewTextFieldWidthWithBaseWidthRatio, showInViewSize.height) options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading  attributes:dict context:nil].size;
-                        attributeCellHeight = labelSize.height / UIAlertViewTextFieldHeightWithBaseHeightRatio;
+                        CGSize labelSizeO = [attributeString.string boundingRectWithSize:CGSizeMake(width * UIAlertViewTextFieldWidthWithBaseWidthRatio, showInViewSize.height) options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading  attributes:dict context:nil].size;
+                        
+                        //方法2
+                        CGSize labelSize = [attributeString boundingRectWithSize:CGSizeMake(width * UIAlertViewTextFieldWidthWithBaseWidthRatio, showInViewSize.height) options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading context:nil].size;
+                        CGSize labelSize = attributeString.size;
+                        */
+                        
+                        attributeCellHeight = [cell getCellLabelFitSizeForCellMaxSize:CGSizeMake(width, showInViewSize.height)].height;
                     }
-                    
                     if (YZHUIALERT_ACTION_STYLE_SHOULD_LAYOUT(obj.actionStyle, self.actionCellLayoutStyle))
                     {
                         BOOL neetLayoutModel = NO;
@@ -965,6 +1156,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
                                 lastY = totalY;
                                 totalY += height;
                                 haveVerticalLine = YES;
+                                ++rowIndex;
                             }
                             y = lastY;
                             width = (contentWidth - lineHeight)/2;
@@ -979,6 +1171,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
                         else
                         {
                             totalY += height;
+                            ++rowIndex;
                         }
                     }
                     else if (obj.actionStyle == YZHUIAlertActionStyleHeadTitle) {
@@ -988,6 +1181,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
                         }
                         haveBottomLine = self.cellHeadTitleMessageHaveSeparatorLine;
                         totalY += height;
+                        ++rowIndex;
                     }
                     else if (obj.actionStyle == YZHUIAlertActionStyleHeadMessage)
                     {
@@ -997,23 +1191,16 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
                         }
                         haveBottomLine = YES;
                         totalY += height;
+                        ++rowIndex;
                     }
                     else if (YZHUIALERT_VIEW_STYLE_IS_SHEET(self.alertViewStyle) && idx + 1 == cnt) {
                         if (attributeCellHeight > height) {
                             height = attributeCellHeight;
                         }
                         
-                        CGPoint point = CGPointMake(0, showInViewSize.height);
-                        CGPoint keyPoint = point;
-                        if (showInView.superview) {
-                            keyPoint = [showInView.superview convertPoint:point toView:[UIApplication sharedApplication].keyWindow];
-                        }
-                        CGFloat diffHeight = keyPoint.y - CGRectGetMaxY(SAFE_FRAME);
-                        if (diffHeight > 0) {
-                            [cell changeSubViewFrame:[cell getCellSubViewFrameForCellSize:CGSizeMake(width, height)]];
-                            height += diffHeight;
-                        }
+                        height = [self _adjustSheetCellHeightForCell:cell cellSize:CGSizeMake(width, height)];
                         totalY += height;
+                        ++rowIndex;
                     }
                     else
                     {
@@ -1021,6 +1208,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
                             height = attributeCellHeight;
                         }
                         totalY += height;
+                        ++rowIndex;
                     }
                 }
                 
@@ -1030,6 +1218,12 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
                 
                 cell.frame = CGRectMake(x, y, width, height);
                 [self addSubview:cell];
+                [self.contentSubViews addObject:cell];
+                cell.rowIndex = rowIndex;
+                cell.contentViewNMSize = [cell getCellContentFrameForCellSize:CGSizeMake(width, height)].size;
+                if (haveContentViewMaxSize == NO) {
+                    cell.contentViewMaxSize = cell.contentViewNMSize;
+                }
                 
                 if (haveBottomLine || haveVerticalLine) {
                     CGFloat lineHeightTmp = lineHeight;
@@ -1041,19 +1235,22 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
                         }
                     }
                     
-                    CALayer *lineLayer = nil;
+                    UIView *line = nil;
                     if (haveBottomLine) {
                         CGRect frame = CGRectMake(0, totalY, contentWidth, lineHeightTmp);
-                        lineLayer = [self _createSeparatorLineWithFrame:frame lineColor:lineColorTmp];
+                        line = [self _createSeparatorLineWithFrame:frame lineColor:lineColorTmp];
                         totalY += lineHeightTmp;
+                        line.rowIndex = 0;
                     }
                     else
                     {
                         CGRect frame = CGRectMake(x+width, y, lineHeightTmp, cellHeight);
-                        lineLayer = [self _createSeparatorLineWithFrame:frame lineColor:lineColorTmp];
+                        line = [self _createSeparatorLineWithFrame:frame lineColor:lineColorTmp];
                         totalX += lineHeightTmp;
+                        line.rowIndex = cell.rowIndex;
                     }
-                    [self.layer addSublayer:lineLayer];
+                    [self addSubview:line];
+                    [self.contentSubViews addObject:line];
                 }
             }];
             contentHeight = totalY;
@@ -1083,62 +1280,59 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     else if (YZHUIALERT_VIEW_STYLE_IS_TIPS(self.alertViewStyle))
     {
         self.frame = CGRectMake(0, -TOP_ALERT_VIEW_HEIGHT, showInViewSize.width, TOP_ALERT_VIEW_HEIGHT);
+        CGFloat x = 0;
+        CGFloat y = STATUS_BAR_HEIGHT;
+        CGFloat w = self.bounds.size.width;
+        CGFloat h = self.bounds.size.height - y;
+        self.tipsButton.frame = CGRectMake(x, y, w, h);
         
-        UILabel *label = [self viewWithTag:YZHUIAlertTipsStyleSubViewTagLabelView];
-        UIImageView *imageView = [self viewWithTag:YZHUIAlertTipsStyleSubViewTagImageView];
+        self.tipsBottomLine.frame = CGRectMake(x, self.bounds.size.height - SINGLE_LINE_WIDTH, w, SINGLE_LINE_WIDTH);
         
         NSText *text = [[NSText alloc] initWithTextObj:self.alertTitle];
         if (IS_AVAILABLE_NSSTRNG(text.text)) {
-            label.text = text.text;
-            label.font = self.cellHeadTitleTextFont;
-            label.textColor = self.cellHeadTitleTextColor;
+            self.tipsButton.titleLabel.font = self.cellHeadTitleTextFont;
+            [self.tipsButton setTitleColor:self.cellHeadTitleTextColor forState:UIControlStateNormal];
+            [self.tipsButton setTitle:text.text forState:UIControlStateNormal];
         }
-        else if (text.attributedText)
+        else if (IS_AVAILABLE_ATTRIBUTEDSTRING(text.attributedText))
         {
-            label.attributedText = text.attributedText;
+            [self.tipsButton setAttributedTitle:text.attributedText forState:UIControlStateNormal];
         }
-
-        [label sizeToFit];
+        UIImage *image = [UIImage imageNamed:self.cellHeadImageName];
+        [self.tipsButton setImage:image forState:UIControlStateNormal];
         
-        CGSize size = label.frame.size;
-        CGFloat x = (showInViewSize.width - size.width)/2;
-        CGFloat diff = STATUS_BAR_HEIGHT;
-        CGFloat y = TOP_ALERT_VIEW_HEIGHT - TOP_ALERT_VIEW_MIN_HEIGHT + diff;
-        label.frame = CGRectMake(x, y, size.width, TOP_ALERT_VIEW_MIN_HEIGHT - diff);
-
-        CGFloat imageWidth = 20;
-        CGFloat imageHeight = 20;
-        CGFloat imageX = MAX(0, x - imageWidth - 10);
-        CGFloat imageY = TOP_ALERT_VIEW_HEIGHT - TOP_ALERT_VIEW_MIN_HEIGHT + diff + (TOP_ALERT_VIEW_MIN_HEIGHT - diff - imageHeight)/2;
-        imageView.frame = CGRectMake(imageX, imageY, imageWidth, imageHeight);
-        imageView.image = [UIImage imageNamed:self.cellHeadImageName];
         if (self.alertViewStyle == YZHUIAlertViewStyleTopWarningTips) {
-            if (IS_AVAILABLE_NSSTRNG(text.text)) {
-                label.font = self.cellHeadTitleHighlightTextFont;
-                label.textColor = self.cellHeadTitleHighlightTextColor;
-            }
-            imageView.image = [UIImage imageNamed:self.cellHeadHighlightImageName];
+            image = [UIImage imageNamed:self.cellHeadHighlightImageName];
+            self.tipsButton.titleLabel.font = self.cellHeadTitleHighlightTextFont;
+            [self.tipsButton setTitleColor:self.cellHeadTitleHighlightTextColor forState:UIControlStateNormal];
+            [self.tipsButton setImage:image forState:UIControlStateNormal];
         }
     }
 }
 
--(YZHUIAlertActionBlock)_alertCancelActionBlock
+-(YZHAlertActionModel*)sheetCancelModel
 {
-    return nil;
-}
-
--(YZHAlertActionModel*)cancelModel
-{
-    if (_cancelModel == nil) {
-        _cancelModel = [[YZHAlertActionModel alloc] init];
-        _cancelModel.actionTitleText = NSLOCAL_STRING(@"取消");
-        _cancelModel.actionStyle = YZHUIAlertActionStyleDefault;
-        _cancelModel.actionBlock = [self _alertCancelActionBlock];
+    if (_sheetCancelModel == nil) {
+        _sheetCancelModel = [[YZHAlertActionModel alloc] init];
+        _sheetCancelModel.actionTitleText = NSLOCAL_STRING(@"取消");
+        _sheetCancelModel.actionStyle = YZHUIAlertActionStyleDefault;
+        _sheetCancelModel.actionBlock = self.forceActionBlock;
     }
-    return _cancelModel;
+    return _sheetCancelModel;
 }
 
--(NSMutableArray*)actionModels
+-(YZHAlertActionModel*)sheetConfirmModel
+{
+    if (_sheetCancelModel == nil) {
+        _sheetCancelModel = [[YZHAlertActionModel alloc] init];
+        _sheetCancelModel.actionTitleText = NSLOCAL_STRING(@"确定");
+        _sheetCancelModel.actionStyle = YZHUIAlertActionStyleDefault;
+        _sheetCancelModel.actionBlock = self.forceActionBlock;
+    }
+    return _sheetCancelModel;
+}
+
+-(NSMutableArray<YZHAlertActionModel*>*)actionModels
 {
     if (_actionModels == nil) {
         _actionModels = [NSMutableArray array];
@@ -1152,7 +1346,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
         return NO;
     }
     if (self.alertViewStyle == YZHUIAlertViewStyleAlertInfo) {
-        if (actionStyle == YZHUIAlertActionStyleTextEdit) {
+        if (!YZHUIALERT_ACTION_STYLE_IS_INFO_SUPPORT(actionStyle)) {
             return NO;
         }
     }
@@ -1163,7 +1357,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     {
         
     }
-    else if (self.alertViewStyle == YZHUIAlertViewStyleActionSheet)
+    else if (YZHUIALERT_VIEW_STYLE_IS_SHEET(self.alertViewStyle))
     {
         if (!YZHUIALERT_ACTION_STYLE_IS_SHEET_SUPPORT(actionStyle)) {
             return NO;
@@ -1185,27 +1379,8 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
 {
     BOOL canAdd = [self _canAddAlertActionWithActionStyle:actionStyle];
     if (canAdd) {
-        YZHAlertActionModel *model = [[YZHAlertActionModel alloc] init];
+        YZHAlertActionModel *model = [self _addAlertActionWithoutCheckWithTitle:actionTitle actionStyle:actionStyle actionBlock:actionBlock];
         model.actionId = actionId;
-        model.actionTitleText = actionTitle;
-        model.actionStyle = actionStyle;
-        model.actionBlock = actionBlock;
-        [self.actionModels addObject:model];
-        
-        return model;
-    }
-    return nil;
-}
-
--(YZHAlertActionModel *)addAlertActionWithCustomCellBlock:(YZHUIAlertActionCellCustomViewBlock)customCellBlock actionBlock:(YZHUIAlertActionBlock)actionBlock
-{
-    BOOL canAdd = [self _canAddAlertActionWithActionStyle:YZHUIAlertActionStyleCustomView];
-    if (canAdd) {
-        YZHAlertActionModel *model = [[YZHAlertActionModel alloc] init];
-        model.actionStyle = YZHUIAlertActionStyleCustomView;
-        model.customCellBlock = customCellBlock;
-        model.actionBlock = actionBlock;
-        [self.actionModels addObject:model];
         return model;
     }
     return nil;
@@ -1224,13 +1399,44 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     return nil;
 }
 
--(void)addAlertActionWithoutCheckWithTitle:(id)title actionStyle:(YZHUIAlertActionStyle)actionStyle actionBlock:(YZHUIAlertActionBlock)actionBlock
+-(YZHAlertActionModel *)addAlertActionWithCustomCellBlock:(YZHUIAlertActionCellCustomViewBlock)customCellBlock actionBlock:(YZHUIAlertActionBlock)actionBlock
+{
+    return [self addCustomAlertActionWithStyle:YZHUIAlertActionStyleCustomCell customCellBlock:customCellBlock actionBlock:actionBlock];
+}
+
+-(YZHAlertActionModel *)addCustomAlertActionWithStyle:(YZHUIAlertActionStyle)actionStyle customCellBlock:(YZHUIAlertActionCellCustomViewBlock)customCellBlock actionBlock:(YZHUIAlertActionBlock)actionBlock
+{
+    if (!TYPE_AND(actionStyle, YZHUIAlertActionStyleCustomMask)) {
+        return nil;
+    }
+    BOOL canAdd = [self _canAddAlertActionWithActionStyle:actionStyle];
+    if (canAdd) {
+        YZHAlertActionModel *model = [self _addAlertActionWithoutCheckWithTitle:nil actionStyle:actionStyle actionBlock:actionBlock];
+        model.customCellBlock = customCellBlock;
+        return model;
+    }
+    return nil;
+}
+
+-(YZHAlertActionModel *)addCustomSheetLastActionWithCustomCellBlock:(YZHUIAlertActionCellCustomViewBlock)customCellBlock actionBlock:(YZHUIAlertActionBlock)actionBlock
+{
+    BOOL canAdd = [self _canAddAlertActionWithActionStyle:YZHUIAlertActionStyleCustomLastSheetCell];
+    if (canAdd) {
+        YZHAlertActionModel *model = [self _addAlertActionWithoutCheckWithTitle:nil actionStyle:YZHUIAlertActionStyleCustomLastSheetCell actionBlock:actionBlock];
+        model.customCellBlock = customCellBlock;
+        return model;
+    }
+    return nil;
+}
+
+-(YZHAlertActionModel *)_addAlertActionWithoutCheckWithTitle:(id)title actionStyle:(YZHUIAlertActionStyle)actionStyle actionBlock:(YZHUIAlertActionBlock)actionBlock
 {
     YZHAlertActionModel *model = [[YZHAlertActionModel alloc] init];
     model.actionTitleText = title;
     model.actionStyle = actionStyle;
     model.actionBlock = actionBlock;
     [self.actionModels addObject:model];
+    return model;
 }
 
 -(CGFloat)_getDefaultAnimateDuration
@@ -1249,9 +1455,44 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     return 0;
 }
 
+-(void)_addSheetActionModel
+{
+    YZHAlertActionModel *last = [self.actionModels lastObject];
+    if (TYPE_AND(last.actionStyle, YZHUIAlertActionStyleCustomMask) == YZHUIAlertActionStyleCustomLastSheetCell) {
+        return;
+    }
+    __block BOOL haveEditStyleAction = NO;
+    [self.actionModels enumerateObjectsUsingBlock:^(YZHAlertActionModel * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (obj.actionStyle == YZHUIAlertActionStyleTextEdit) {
+            haveEditStyleAction = YES;
+            *stop = YES;
+        }
+    }];
+    
+    if (haveEditStyleAction) {
+        [self.actionModels addObject:self.sheetConfirmModel];
+    }
+    else {
+        [self.actionModels addObject:self.sheetCancelModel];
+    }
+}
+
+-(UIView*)_doPrepareShowInView:(UIView*)inView
+{
+    if (YZHUIALERT_VIEW_STYLE_IS_SHEET(self.alertViewStyle)) {
+        [self _addSheetActionModel];
+    }
+    UIView *showInView = inView;
+    if (!showInView) {
+        showInView = [UIApplication sharedApplication].keyWindow;
+    }
+    [self _createAlertActionCellWithShowInView:showInView];
+    return self.showInView;
+}
+
 -(void)_showInView:(UIView *)inView frame:(CGRect)frame
 {
-    [self prepareShowInView:inView];
+    [self _doPrepareShowInView:inView];
     
     if (CGSizeEqualToSize(frame.size, CGSizeZero)) {
         frame = self.showInView.bounds;
@@ -1307,7 +1548,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
         self.layer.cornerRadius = 0;
         if ([self _haveTransformYAnimated]) {
             [UIView animateWithDuration:self.animateDuration delay:0 usingSpringWithDamping:0.45 initialSpringVelocity:8 options:UIViewAnimationOptionCurveEaseInOut animations:^{
-                self.transform = CGAffineTransformMakeTranslation(0, TOP_ALERT_VIEW_MIN_HEIGHT);
+                self.transform = CGAffineTransformMakeTranslation(0, TOP_ALERT_VIEW_HEIGHT);
             } completion:^(BOOL finished) {
                 [UIView animateWithDuration:self.animateDuration delay:1.0 options:UIViewAnimationOptionCurveEaseIn animations:^{
                     self.transform = CGAffineTransformMakeTranslation(0, 0);
@@ -1315,6 +1556,13 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
                     [self removeFromSuperview];
                 }];
             }];
+        }
+        else {
+            self.transform = CGAffineTransformMakeTranslation(0, TOP_ALERT_VIEW_HEIGHT);
+            dispatch_after_in_main_queue(1, ^{
+                self.transform = CGAffineTransformMakeTranslation(0, 0);
+                [self removeFromSuperview];
+            });
         }
     }
 }
@@ -1427,6 +1675,65 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     return self.showInView;
 }
 
+-(void)updateAlertActionCellsLayout
+{
+    if (YZHUIALERT_VIEW_STYLE_IS_TIPS(self.alertViewStyle)) {
+        return;
+    }
+    __block UIView *lastObj = nil;
+    __block YZHUIAlertActionCell *lastCell = nil;
+    [self.contentSubViews enumerateObjectsUsingBlock:^(UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (lastCell) {
+            CGRect frame = obj.frame;
+            if (obj.rowIndex == lastCell.rowIndex) {
+                frame.origin.y = lastCell.frame.origin.y;
+            }
+            else {
+                frame.origin.y = CGRectGetMaxY(lastObj.frame);
+            }
+            obj.frame = frame;
+        }
+        
+        if ([obj isKindOfClass:[YZHUIAlertActionCell class]]) {
+            lastCell = (YZHUIAlertActionCell*)obj;
+        }
+        lastObj = obj;
+    }];
+    
+    CGFloat height = CGRectGetMaxY(lastObj.frame);
+    CGRect frame = self.frame;
+    frame.origin.y = frame.origin.y - (height - frame.size.height);
+    frame.size.height = height;
+    self.frame = frame;
+}
+
+-(YZHUIAlertActionCell*)_alertActionCellForActionModel:(YZHAlertActionModel*)actionModel cellIndex:(NSInteger)cellIndex
+{
+    __block YZHUIAlertActionCell *cell = nil;
+    [self.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (NSOBJ_TYPE_IS_CLASS(obj, YZHUIAlertActionCell)) {
+            YZHUIAlertActionCell *cellTmp = (YZHUIAlertActionCell*)obj;
+            if ((actionModel != nil && cellTmp.actionModel == actionModel) || (actionModel.actionId != nil && [cellTmp.actionModel.actionId isEqualToString:actionModel.actionId]) || (cellIndex >= 0 && cellTmp.cellIndex == cellIndex)) {
+                cell = cellTmp;
+                *stop = YES;
+            }
+        }
+    }];
+    return cell;
+}
+
+-(void)updateAlertActionCellForIndex:(NSInteger)index contentSize:(CGSize)contentSize
+{
+    YZHUIAlertActionCell *cell = [self _alertActionCellForActionModel:nil cellIndex:index];
+    [cell updateAlertActionCellContentViewSize:contentSize];
+}
+
+-(void)updateAlertActionCellForActionModel:(YZHAlertActionModel*)actionModel contentSize:(CGSize)contentSize
+{
+    YZHUIAlertActionCell *cell = [self _alertActionCellForActionModel:actionModel cellIndex:-1];
+    [cell updateAlertActionCellContentViewSize:contentSize];
+}
+
 +(NSArray<YZHUIAlertView*>*)alertViewsForTag:(NSInteger)tag inView:(UIView*)inView
 {
     if (inView == nil) {
@@ -1448,14 +1755,11 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
 
 -(void)registerNotification:(BOOL)regist
 {
-
-#if USE_KEYBOARD_MANAGER
-
     if (regist) {
         self.keyboardManager = [[NSKeyboardManager alloc] init];
         self.keyboardManager.relatedShiftView = self;
         self.keyboardManager.firstResponderView = self;
-        self.keyboardManager.keyboardMinTop = 5;
+        self.keyboardManager.keyboardTopToResponder = 5;
     }
     else
     {
@@ -1463,57 +1767,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
         self.keyboardManager.firstResponderView = nil;
         self.keyboardManager = nil;
     }
-#else
-    if (regist) {
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillShow:) name:UIKeyboardWillShowNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
-    }
-    else
-    {
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
-    }
-#endif
-    
 }
-
-#if !USE_KEYBOARD_MANAGER
-#pragma mark keyBoard
-
--(void)keyBoardWillShow:(NSNotification*)notification
-{
-    NSTimeInterval time = [[notification.userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-    
-    CGRect keyBoardFrame = CGRectZero;
-    [notification.userInfo[UIKeyboardFrameEndUserInfoKey] getValue:&keyBoardFrame];
-    
-    CGFloat diffY = keyBoardFrame.origin.y - CGRectGetMaxY(self.frame);
-    if (diffY >= 0) {
-        return;
-    }
-    
-    CGFloat oldTranslationY = self.transform.ty;
-    
-    CGFloat ty = oldTranslationY + diffY;
-    
-    [UIView animateWithDuration:time animations:^{
-        self.transform = CGAffineTransformMakeTranslation(0, ty);
-    }];
-}
-
--(void)keyBoardWillHide:(NSNotification*)notification
-{
-    NSTimeInterval time = [[notification.userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-    
-    CGSize size = self.bounds.size;
-    CGFloat translationY = size.height + (self.cover.bounds.size.height - size.height)/2;
-    
-    [UIView animateWithDuration:time animations:^{
-        self.transform = CGAffineTransformMakeTranslation(0, translationY);
-    }];
-}
-
-#endif
 
 -(void)dealloc
 {
@@ -1543,47 +1797,30 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
 
 -(UIView*)prepareShowInView:(UIView*)inView
 {
-    if (YZHUIALERT_VIEW_STYLE_IS_SHEET(self.alertViewStyle)) {
-        [self.actionModels addObject:self.cancelModel];
-    }
-    UIView *showInView = inView;
-    if (!showInView) {
-        showInView = [UIApplication sharedApplication].keyWindow;
-    }
-    [self _createAlertActionCellWithShowInView:showInView];
-    return self.showInView;
-}
-
--(YZHUIAlertActionCell*)_alterActionCellForActionModel:(YZHAlertActionModel*)actionModel cellIndex:(NSInteger)cellIndex
-{
-    __block YZHUIAlertActionCell *cell = nil;
-    [self.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if (NSOBJ_TYPE_IS_CLASS(obj, YZHUIAlertActionCell)) {
-            YZHUIAlertActionCell *cellTmp = (YZHUIAlertActionCell*)obj;
-            if ((actionModel != nil && cellTmp.actionModel == actionModel) || (actionModel.actionId != nil && [cellTmp.actionModel.actionId isEqualToString:actionModel.actionId]) || (cellIndex >= 0 && cellTmp.cellIndex == cellIndex)) {
-                cell = cellTmp;
-                *stop = YES;
-            }
-        }
-    }];
-    return cell;
+    return [self _doPrepareShowInView:inView];
 }
 
 -(UILabel*)alertTextLabelForAlertActionModel:(YZHAlertActionModel*)actionModel
 {
-    YZHUIAlertActionCell *cell = [self _alterActionCellForActionModel:actionModel cellIndex:-1];
+    YZHUIAlertActionCell *cell = [self _alertActionCellForActionModel:actionModel cellIndex:-1];
     return cell.textLabel;
+}
+
+-(UITextView*)alertTextViewForAlertActionModel:(YZHAlertActionModel*)actionModel
+{
+    YZHUIAlertActionCell *cell = [self _alertActionCellForActionModel:actionModel cellIndex:-1];
+    return cell.textView;
 }
 
 -(UITextField*)alertEditTextFieldForAlertActionModel:(YZHAlertActionModel*)actionModel
 {
-    YZHUIAlertActionCell *cell = [self _alterActionCellForActionModel:actionModel cellIndex:-1];
+    YZHUIAlertActionCell *cell = [self _alertActionCellForActionModel:actionModel cellIndex:-1];
     return cell.editTextField;
 }
 
 -(UIView*)alertCustomCellSubViewForAlertActionModel:(YZHAlertActionModel*)actionModel
 {
-    YZHUIAlertActionCell *cell = [self _alterActionCellForActionModel:actionModel cellIndex:-1];
+    YZHUIAlertActionCell *cell = [self _alertActionCellForActionModel:actionModel cellIndex:-1];
     return cell.customView;
 }
 
@@ -1594,7 +1831,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     }
     YZHAlertActionModel *actionModel = self.actionModels[index];
     
-    YZHUIAlertActionCell *cell = [self _alterActionCellForActionModel:actionModel cellIndex:index];
+    YZHUIAlertActionCell *cell = [self _alertActionCellForActionModel:actionModel cellIndex:index];
     if (cell.cellType == NSAlertActionCellTypeTextLabel) {
         return cell.textLabel;
     }
@@ -1606,6 +1843,10 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
     {
         return cell.customView;
     }
+    else if (cell.cellType == NSAlertActionCellTypeTextView)
+    {
+        return cell.textView;
+    }
     return cell.textLabel;
 }
 
@@ -1613,7 +1854,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
 {
     NSMutableDictionary *mutDict = [NSMutableDictionary dictionary];
     [self.actionModels enumerateObjectsUsingBlock:^(YZHAlertActionModel * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        YZHUIAlertActionCell *cell = [self _alterActionCellForActionModel:obj cellIndex:idx];
+        YZHUIAlertActionCell *cell = [self _alertActionCellForActionModel:obj cellIndex:idx];
         if (cell.cellType == NSAlertActionCellTypeTextField) {
             YZHUIAlertActionTextStyle textStyle = obj.textStyle;
             if (textStyle == YZHUIAlertActionTextStyleNormal) {
@@ -1625,6 +1866,17 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
             }
             [mutDict setObject:obj forKey:@(cell.cellIndex)];
         }
+        else if (cell.cellType == NSAlertActionCellTypeTextView) {
+            YZHUIAlertActionTextStyle textStyle = obj.textStyle;
+            if (textStyle == YZHUIAlertActionTextStyleNormal) {
+                obj.alertEditText = cell.textView.text;
+            }
+            else if (textStyle == YZHUIAlertActionTextStyleAttribute)
+            {
+                obj.alertEditText = cell.textView.attributedText;
+            }
+            [mutDict setObject:obj forKey:@(cell.cellIndex)];
+        }
     }];
     return [mutDict copy];
 }
@@ -1633,7 +1885,7 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
 {
     NSMutableDictionary *mutDict = [NSMutableDictionary dictionary];
     [self.actionModels enumerateObjectsUsingBlock:^(YZHAlertActionModel * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        YZHUIAlertActionCell *cell = [self _alterActionCellForActionModel:obj cellIndex:idx];
+        YZHUIAlertActionCell *cell = [self _alertActionCellForActionModel:obj cellIndex:idx];
         if (cell.cellType == NSAlertActionCellTypeCustomView)
         {
             [mutDict setObject:cell.customView forKey:@(cell.cellIndex)];
@@ -1646,7 +1898,10 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
 {
     NSMutableDictionary *mutDict = [NSMutableDictionary dictionary];
     [self.actionModels enumerateObjectsUsingBlock:^(YZHAlertActionModel * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        YZHUIAlertActionCell *cell = [self _alterActionCellForActionModel:obj cellIndex:idx];
+        YZHUIAlertActionCell *cell = [self _alertActionCellForActionModel:obj cellIndex:idx];
+        if (!cell) {
+            return ;
+        }
         if (cell.cellType == NSAlertActionCellTypeCustomView)
         {
             [mutDict setObject:cell.customView forKey:@(cell.cellIndex)];
@@ -1660,6 +1915,18 @@ typedef NS_ENUM(NSInteger, NSAlertActionCellType)
             else if (textStyle == YZHUIAlertActionTextStyleAttribute)
             {
                 obj.alertEditText = cell.editTextField.attributedText;
+            }
+            [mutDict setObject:obj forKey:@(cell.cellIndex)];
+        }
+        else if (cell.cellType == NSAlertActionCellTypeTextView)
+        {
+            YZHUIAlertActionTextStyle textStyle = obj.textStyle;
+            if (textStyle == YZHUIAlertActionTextStyleNormal) {
+                obj.alertEditText = cell.textView.text;
+            }
+            else if (textStyle == YZHUIAlertActionTextStyleAttribute)
+            {
+                obj.alertEditText = cell.textView.attributedText;
             }
             [mutDict setObject:obj forKey:@(cell.cellIndex)];
         }

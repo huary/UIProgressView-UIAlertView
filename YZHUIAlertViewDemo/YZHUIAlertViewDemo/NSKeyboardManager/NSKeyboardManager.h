@@ -9,33 +9,24 @@
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
 
-//typedef NS_ENUM(NSInteger, NSKeyboardState)
-//{
-//    NSKeyboardStateNull         = 0,
-//    NSKeyboardStateWillShow     = 1,
-//    NSKeyboardStateEndShow      = 2,
-//};
-
 @class NSKeyboardManager;
-typedef void(^NSKeyboardWillShowBlock)(NSKeyboardManager *keyboardManager);
-typedef void(^NSKeyboardWillHideBlock)(NSKeyboardManager *keyboardManager);
+typedef void(^NSKeyboardWillShowBlock)(NSKeyboardManager *keyboardManager, NSNotification *keyboardNotification);
+typedef void(^NSKeyboardWillHideBlock)(NSKeyboardManager *keyboardManager, NSNotification *keyboardNotification);
+typedef void(^NSKeyboardWillUpdateBlock)(NSKeyboardManager *keyboardManager, NSNotification *keyboardNotification, BOOL isShow);
 typedef void(^NSKeyboardDidHideBlock)(NSKeyboardManager *keyboardManager);
 
 @interface NSKeyboardManager : NSObject
-
-//+(instancetype)shareKeyboardManager;
 
 @property (nonatomic, weak) UIView *relatedShiftView;
 
 //既可以指定也可以不用指定，就是keyboard不要遮挡的view,默认会自动去获取
 @property (nonatomic, weak) UIView *firstResponderView;
 //指的是keyboard和firstResponder的最小距离,默认为0;
-@property (nonatomic, assign) CGFloat keyboardMinTop;
-
-//@property (nonatomic, assign, readonly) NSKeyboardState keyboardState;
+@property (nonatomic, assign) CGFloat keyboardTopToResponder;
 
 @property (nonatomic, copy) NSKeyboardWillShowBlock willShowBlock;
 @property (nonatomic, copy) NSKeyboardWillHideBlock willHideBlock;
+@property (nonatomic, copy) NSKeyboardWillUpdateBlock willUpdateBlock;
 @property (nonatomic, copy) NSKeyboardDidHideBlock didHideBlock;
 @end
 

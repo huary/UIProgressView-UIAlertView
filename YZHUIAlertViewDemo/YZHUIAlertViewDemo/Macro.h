@@ -100,8 +100,9 @@
 
 //颜色
 #undef RGB
-#define RGB(R,G,B)                              [UIColor colorWithRed:(R)/255.f green:(G)/255.f blue:(B)/255.f alpha:1.f]
-#define RGBA(R,G,B,A)                           [UIColor colorWithRed:(R)/255.f green:(G)/255.f blue:(B)/255.f alpha:(A)/255.f];
+#define RGBA_F(R,G,B,A)                         [UIColor colorWithRed:R green:G blue:B alpha:A]
+#define RGB(R,G,B)                              RGBA_F((R)/255.f,(G)/255.f,(B)/255.f,1.0)
+#define RGBA(R,G,B,A)                           RGBA_F((R)/255.f,(G)/255.f,(B)/255.f,(A)/255.f)
 
 
 #define RGB_WITH_INT_WITH_NO_ALPHA(C_INT)       RGB(TYPE_AND(TYPE_RS(C_INT,16),255),TYPE_AND(TYPE_RS(C_INT,8),255),TYPE_AND(C_INT,255))
@@ -181,6 +182,7 @@
 #define IS_AVAILABLE_NSOBJECT_NOT_NULL(OBJ)     ((OBJ) != nil &&  (OBJ) != [NSNull null])
 #define IS_AVAILABLE_CGSIZE(SIZE)               ((SIZE.width >0) && (SIZE.height > 0))
 #define IS_AVAILABLE_DATA(DATA)                 (DATA != nil && DATA.length > 0)
+#define IS_AVAILABLE_ATTRIBUTEDSTRING(ATTR_STR) (ATTR_STR != nil && ATTR_STR.length > 0)
 
 
 //返回的一些安全操作
@@ -576,6 +578,7 @@
 
 #define SINGLE_LINE_WIDTH           (1 / SCREEN_SCALE)
 #define SINGLE_LINE_ADJUST_OFFSET   ((1 / SCREEN_SCALE) / 2)
+#define SINGLE_LINE_COLOR           RGB_WITH_INT_WITH_NO_ALPHA(0xdddddd)
 
 
 #define PROJ_MAIN_COLOR      MainColor //RGB_WITH_INT_WITH_NO_ALPHA(0X00DAAA)
@@ -587,6 +590,10 @@ static inline void dispatch_async_in_main_queue(void (^block)(void)) {
     } else {
         dispatch_async(dispatch_get_main_queue(), block);
     }
+}
+
+static inline void dispatch_after_in_main_queue(NSTimeInterval after ,void (^block)(void)) {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, after * NSEC_PER_SEC), dispatch_get_main_queue(), block);
 }
 
 
