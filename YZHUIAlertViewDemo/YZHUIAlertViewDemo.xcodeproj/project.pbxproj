@@ -13,7 +13,6 @@
 		1C0B97771EAB56A4001666AF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1C0B97751EAB56A4001666AF /* Main.storyboard */; };
 		1C0B97791EAB56A4001666AF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1C0B97781EAB56A4001666AF /* Assets.xcassets */; };
 		1C0B977C1EAB56A4001666AF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1C0B977A1EAB56A4001666AF /* LaunchScreen.storyboard */; };
-		1C1D94FE211BD8CF00E22066 /* YZHUIButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C1D94FD211BD8CF00E22066 /* YZHUIButton.m */; };
 		1C1D9503211C24EF00E22066 /* YZHUITextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C1D9502211C24EE00E22066 /* YZHUITextView.m */; };
 		1C421CB51EF3C2B800357DC5 /* success@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1C421CB31EF3C2B800357DC5 /* success@2x.png */; };
 		1C421CC51EF445EF00357DC5 /* YZHUIAlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C421CC41EF445EF00357DC5 /* YZHUIAlertView.m */; };
@@ -23,6 +22,7 @@
 		1CC7DC831EF5228C002B5D09 /* fail@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1CC7DC821EF5228C002B5D09 /* fail@2x.png */; };
 		1CC7DC861EF5229B002B5D09 /* YZHUIProgressView+Default.m in Sources */ = {isa = PBXBuildFile; fileRef = 1CC7DC851EF5229B002B5D09 /* YZHUIProgressView+Default.m */; };
 		1CC86CC020AEA12300005AE3 /* YZHUIGraphicsImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 1CC86CBF20AEA12300005AE3 /* YZHUIGraphicsImage.m */; };
+		1CD79FB4212303BE00123316 /* YZHUIButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 1CD79FB3212303BE00123316 /* YZHUIButton.m */; };
 		1CEC4C051EEA32870052ECE3 /* YZHUIProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1CEC4C041EEA32870052ECE3 /* YZHUIProgressView.m */; };
 /* End PBXBuildFile section */
 
@@ -37,8 +37,6 @@
 		1C0B97781EAB56A4001666AF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1C0B977B1EAB56A4001666AF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		1C0B977D1EAB56A4001666AF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		1C1D94FC211BD8CF00E22066 /* YZHUIButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YZHUIButton.h; sourceTree = "<group>"; };
-		1C1D94FD211BD8CF00E22066 /* YZHUIButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YZHUIButton.m; sourceTree = "<group>"; };
 		1C1D9501211C24EE00E22066 /* YZHUITextView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YZHUITextView.h; sourceTree = "<group>"; };
 		1C1D9502211C24EE00E22066 /* YZHUITextView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = YZHUITextView.m; sourceTree = "<group>"; };
 		1C421CB31EF3C2B800357DC5 /* success@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "success@2x.png"; sourceTree = "<group>"; };
@@ -57,6 +55,8 @@
 		1CC7DC851EF5229B002B5D09 /* YZHUIProgressView+Default.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "YZHUIProgressView+Default.m"; sourceTree = "<group>"; };
 		1CC86CBE20AEA12300005AE3 /* YZHUIGraphicsImage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YZHUIGraphicsImage.h; sourceTree = "<group>"; };
 		1CC86CBF20AEA12300005AE3 /* YZHUIGraphicsImage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = YZHUIGraphicsImage.m; sourceTree = "<group>"; };
+		1CD79FB2212303BE00123316 /* YZHUIButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YZHUIButton.h; sourceTree = "<group>"; };
+		1CD79FB3212303BE00123316 /* YZHUIButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YZHUIButton.m; sourceTree = "<group>"; };
 		1CEC4C031EEA32870052ECE3 /* YZHUIProgressView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YZHUIProgressView.h; sourceTree = "<group>"; };
 		1CEC4C041EEA32870052ECE3 /* YZHUIProgressView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YZHUIProgressView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -91,8 +91,8 @@
 		1C0B976B1EAB56A4001666AF /* YZHUIAlertViewDemo */ = {
 			isa = PBXGroup;
 			children = (
+				1CD79FB1212303BE00123316 /* YZHUIButton */,
 				1C1D9500211C24BF00E22066 /* YZHUITextView */,
-				1C1D94FB211BD8CF00E22066 /* YZHUIButton */,
 				1C557E90208F2F4E0006E857 /* Macro.h */,
 				1C7924781F56BB9C00512172 /* NSKeyboardManager */,
 				1C421CB11EF3C2B800357DC5 /* resource */,
@@ -121,15 +121,6 @@
 				1C0B976D1EAB56A4001666AF /* main.m */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		1C1D94FB211BD8CF00E22066 /* YZHUIButton */ = {
-			isa = PBXGroup;
-			children = (
-				1C1D94FC211BD8CF00E22066 /* YZHUIButton.h */,
-				1C1D94FD211BD8CF00E22066 /* YZHUIButton.m */,
-			);
-			path = YZHUIButton;
 			sourceTree = "<group>";
 		};
 		1C1D9500211C24BF00E22066 /* YZHUITextView */ = {
@@ -166,6 +157,15 @@
 				1C79247A1F56BB9C00512172 /* NSKeyboardManager.m */,
 			);
 			path = NSKeyboardManager;
+			sourceTree = "<group>";
+		};
+		1CD79FB1212303BE00123316 /* YZHUIButton */ = {
+			isa = PBXGroup;
+			children = (
+				1CD79FB2212303BE00123316 /* YZHUIButton.h */,
+				1CD79FB3212303BE00123316 /* YZHUIButton.m */,
+			);
+			path = YZHUIButton;
 			sourceTree = "<group>";
 		};
 		1CEC4C021EEA32490052ECE3 /* YZHUIProgressView */ = {
@@ -257,7 +257,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1CC86CC020AEA12300005AE3 /* YZHUIGraphicsImage.m in Sources */,
-				1C1D94FE211BD8CF00E22066 /* YZHUIButton.m in Sources */,
+				1CD79FB4212303BE00123316 /* YZHUIButton.m in Sources */,
 				1C7E266E2085C39C00C2D7A0 /* TestProgressViewController.m in Sources */,
 				1C0B97741EAB56A4001666AF /* ViewController.m in Sources */,
 				1C421CC51EF445EF00357DC5 /* YZHUIAlertView.m in Sources */,

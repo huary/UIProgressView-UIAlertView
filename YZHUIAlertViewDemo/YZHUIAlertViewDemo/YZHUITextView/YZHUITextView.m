@@ -70,6 +70,36 @@
 #if !USE_TEXTVIEW_TEXT_AS_PLACEHOLDER
     self.placeHolderTextView.frame = self.bounds;
 #endif
+    CGFloat w = self.contentSize.width;
+    CGFloat h = MAX(self.contentSize.height, self.bounds.size.height);
+    [self _textContainerView].frame = CGRectMake(0, 0, w, h);
+}
+
+-(UIView*)_textContainerView
+{
+    UIView *textContainerView = nil;
+    for (UIView *subView in self.subviews) {
+        if ([subView isKindOfClass:NSClassFromString(@"_UITextContainerView")]) {
+            textContainerView = subView;
+            break;
+        }
+    }
+    
+    return textContainerView;
+}
+
+-(UIView*)_textSelectRangeView
+{
+    UIView *textContainerView = [self _textContainerView];
+    UIView *textSelectionView = nil;
+    for (UIView *subView in textContainerView.subviews) {
+        if ([subView isKindOfClass:NSClassFromString(@"UITextSelectionView")]) {
+            textSelectionView = subView;
+            break;
+        }
+    }
+    
+    return [textSelectionView.subviews firstObject];
 }
 
 -(UIColor*)_placeHolderTextColor
@@ -271,9 +301,8 @@
     if (notification.object == self) {
         [self _hiddenPlaceholderTextView];
         
-        CGSize textSize = CGSizeZero;
+        CGSize textSize = [self sizeThatFits:self.contentSize];
         if (self.textChangeBlock) {
-            textSize = [self sizeThatFits:self.contentSize];
             self.textChangeBlock(self, textSize);
             
         }
@@ -304,6 +333,16 @@
     }
     self.lastContentSize = contentSize;
 }
+
+-(void)setContentOffset:(CGPoint)contentOffset
+{
+    if (!self.decelerating && !self.tracking && !self.dragging && self.selectedRange.location >= self.text.length) {
+        CGFloat y = self.contentSize.height - self.frame.size.height;
+        contentOffset.y = MAX(0, y);
+    }
+    [super setContentOffset:contentOffset];
+}
+
 
 -(void)dealloc
 {

@@ -13,7 +13,8 @@
 typedef void(^NSKeyboardWillShowBlock)(NSKeyboardManager *keyboardManager, NSNotification *keyboardNotification);
 typedef void(^NSKeyboardWillHideBlock)(NSKeyboardManager *keyboardManager, NSNotification *keyboardNotification);
 typedef void(^NSKeyboardWillUpdateBlock)(NSKeyboardManager *keyboardManager, NSNotification *keyboardNotification, BOOL isShow);
-typedef void(^NSKeyboardDidHideBlock)(NSKeyboardManager *keyboardManager);
+typedef void(^NSKeyboardDidHideBlock)(NSKeyboardManager *keyboardManager, NSNotification *keyboardNotification);
+typedef void(^NSKeyboardDidShowBlock)(NSKeyboardManager *keyboardManager, NSNotification *keyboardNotification);
 
 @interface NSKeyboardManager : NSObject
 
@@ -27,6 +28,7 @@ typedef void(^NSKeyboardDidHideBlock)(NSKeyboardManager *keyboardManager);
 @property (nonatomic, copy) NSKeyboardWillShowBlock willShowBlock;
 @property (nonatomic, copy) NSKeyboardWillHideBlock willHideBlock;
 @property (nonatomic, copy) NSKeyboardWillUpdateBlock willUpdateBlock;
+@property (nonatomic, copy) NSKeyboardDidShowBlock didShowBlock;
 @property (nonatomic, copy) NSKeyboardDidHideBlock didHideBlock;
 @end
 

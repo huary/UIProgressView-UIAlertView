@@ -61,13 +61,20 @@
 -(void)_registerKeyboardNotification:(BOOL)regist
 {
     if (regist) {
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyBoardWillShow:) name:UIKeyboardWillShowNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyboardDidHide:) name:UIKeyboardDidHideNotification object:nil];
     }
     else
     {
         [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
         [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
+        
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidShowNotification object:nil];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidHideNotification object:nil];
     }
 }
 
@@ -109,9 +116,20 @@
     firstResponderViewFrame = [self.firstResponderView.superview convertRect:firstResponderViewFrame toView:[UIApplication sharedApplication].keyWindow];
     
     void (^animateCompletionBlock)(BOOL finished) = ^(BOOL finished){
-        if (isHide && self.didHideBlock) {
-            self.didHideBlock(self);
-        }
+//        if (isHide && self.didHideBlock) {
+//            self.didHideBlock(self);
+//        }
+        
+//        if (isHide) {
+//            if (self.didHideBlock) {
+//                self.didHideBlock(self);
+//            }
+//        }
+//        else {
+//            if (self.didShowBlock) {
+//                self.didShowBlock(self);
+//            }
+//        }
     };
     
     CGFloat diffY = keyboardFrame.origin.y - CGRectGetMaxY(firstResponderViewFrame) - self.keyboardTopToResponder;
@@ -211,8 +229,9 @@ _DID_BECOME_FIRST_RESPONDER_END:
     }
 }
 
--(void)_keyBoardWillShow:(NSNotification*)notification
+-(void)_keyboardWillShow:(NSNotification*)notification
 {
+//    NSLog(@"notification=%@",notification);
     if (self.willShowBlock) {
         self.willShowBlock(self, notification);
     }
@@ -221,12 +240,29 @@ _DID_BECOME_FIRST_RESPONDER_END:
 
 }
 
--(void)_keyBoardWillHide:(NSNotification*)notification
+-(void)_keyboardWillHide:(NSNotification*)notification
 {
+//    NSLog(@"notification=%@",notification);
     if (self.willHideBlock) {
         self.willHideBlock(self, notification);
     }
     [self _keyboardAction:notification show:NO];
+}
+
+-(void)_keyboardDidShow:(NSNotification*)notification
+{
+//    NSLog(@"notification=%@",notification);
+    if (self.didShowBlock) {
+        self.didShowBlock(self, notification);
+    }
+}
+
+-(void)_keyboardDidHide:(NSNotification*)notification
+{
+//    NSLog(@"notification=%@",notification);
+    if (self.didHideBlock) {
+        self.didHideBlock(self, notification);
+    }
 }
 
 -(void)dealloc

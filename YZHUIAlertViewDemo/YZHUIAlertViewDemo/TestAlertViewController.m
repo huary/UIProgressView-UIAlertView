@@ -251,10 +251,10 @@
             return YES;
         }];
         
-        [alertView addAlertActionWithTitle:@"4" actionStyle:YZHUIAlertActionStyleTextEdit actionBlock:^BOOL(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {
-            NSLog(@"actionModel.actionTitle=%@",actionModel.actionTitleText);
-            return NO;
-        }];
+//        [alertView addAlertActionWithTitle:@"4" actionStyle:YZHUIAlertActionStyleTextEdit actionBlock:^BOOL(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {
+//            NSLog(@"actionModel.actionTitle=%@",actionModel.actionTitleText);
+//            return NO;
+//        }];
         
         
         YZHAlertActionModel *actionModel = [alertView addAlertActionWithTitle:@"5" actionStyle:YZHUIAlertActionStyleTextViewWrite actionBlock:^BOOL(YZHAlertActionModel *actionModel, NSDictionary *actionCellInfo) {

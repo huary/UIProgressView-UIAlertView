@@ -42,7 +42,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "YZHUIAlertViewDemo/TestAlertViewController.m"
-            timestampString = "555862549.991413"
+            timestampString = "555926742.166677"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "338"
@@ -58,7 +58,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "YZHUIAlertViewDemo/TestAlertViewController.m"
-            timestampString = "555862549.991537"
+            timestampString = "555926742.166757"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "67"
@@ -74,11 +74,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "YZHUIAlertViewDemo/YZHUITextView/YZHUITextView.m"
-            timestampString = "555862549.991637"
+            timestampString = "555942852.710253"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "172"
-            endingLineNumber = "172"
+            startingLineNumber = "202"
+            endingLineNumber = "202"
             landmarkName = "-setPlaceholder:"
             landmarkType = "7">
          </BreakpointContent>
@@ -90,11 +90,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "YZHUIAlertViewDemo/YZHUITextView/YZHUITextView.m"
-            timestampString = "555862549.99178"
+            timestampString = "555942852.7103699"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "128"
-            endingLineNumber = "128"
+            startingLineNumber = "158"
+            endingLineNumber = "158"
             landmarkName = "-_canUpdatePlaceholder"
             landmarkType = "7">
          </BreakpointContent>
@@ -106,11 +106,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "YZHUIAlertViewDemo/YZHUITextView/YZHUITextView.m"
-            timestampString = "555862549.9919"
+            timestampString = "555942852.710447"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "174"
-            endingLineNumber = "174"
+            startingLineNumber = "204"
+            endingLineNumber = "204"
             landmarkName = "-setPlaceholder:"
             landmarkType = "7">
          </BreakpointContent>
@@ -122,11 +122,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "YZHUIAlertViewDemo/YZHUITextView/YZHUITextView.m"
-            timestampString = "555862549.9920011"
+            timestampString = "555942852.710518"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "159"
-            endingLineNumber = "159"
+            startingLineNumber = "189"
+            endingLineNumber = "189"
             landmarkName = "-_didEndEditingAction:"
             landmarkType = "7">
          </BreakpointContent>
@@ -138,12 +138,28 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "YZHUIAlertViewDemo/YZHUIProgressView/YZHUIAlertView/YZHUIAlertView.m"
-            timestampString = "555862549.9921"
+            timestampString = "555942852.710601"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "875"
-            endingLineNumber = "875"
-            landmarkName = "-layoutSubviews"
+            startingLineNumber = "221"
+            endingLineNumber = "221"
+            landmarkName = "-_setupDefaultValue"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "YZHUIAlertViewDemo/YZHUIProgressView/YZHUIAlertView/YZHUIAlertView.m"
+            timestampString = "555942852.711038"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "379"
+            endingLineNumber = "379"
+            landmarkName = "-_changeTextViewSizeAction:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

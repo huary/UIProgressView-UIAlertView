@@ -35,6 +35,8 @@
 
 #define YZHUIALERT_ACTION_STYLE_IS_TEXTVIEW(ACTION_STYLE)   ((ACTION_STYLE) == YZHUIAlertActionStyleTextViewRead || (ACTION_STYLE) == YZHUIAlertActionStyleTextViewWrite || (ACTION_STYLE) == YZHUIAlertActionStyleTextViewRW)
 
+#define YZHUIALERT_ACTION_STYLE_IS_EDIT(ACTION_STYLE)       (YZHUIALERT_ACTION_STYLE_IS_TEXTVIEW(ACTION_STYLE) || (ACTION_STYLE) == YZHUIAlertActionStyleTextEdit)
+
 static const CGFloat defaultYZHUIAlertViewStyleAlertAnimateDuration             = 0.8;
 static const CGFloat defaultYZHUIAlertViewStyleTopTipsAnimateDuration           = 0.3;
 static const CGFloat defaultYZHUIAlertViewStyleActionSheetAnimateDuration       = 0.3;
@@ -349,8 +351,18 @@ typedef void(^YZHUIAlertActionCellContentViewChangeSizeBlock)(YZHUIAlertActionCe
     textView.contentSizeChangeBlock = ^(YZHUITextView *textView, CGSize lastContentSize) {
         [weakSelf _changeTextViewSizeAction:textView];
     };
+    
+//    textView.textSizeChangeBlock = ^(YZHUITextView *textView, CGSize textSize) {
+//        [weakSelf _changeTextViewSizeAction:textView];
+//    };
+    
+//    textView.textChangeBlock = ^(YZHUITextView *textView, CGSize textSize) {
+//        [weakSelf _changeTextViewSizeAction:textView];
+//    };
+    
     return textView;
 }
+
 
 -(void)_changeTextViewSizeAction:(YZHUITextView *)textView
 {
@@ -363,8 +375,8 @@ typedef void(^YZHUIAlertActionCellContentViewChangeSizeBlock)(YZHUIAlertActionCe
     
     CGFloat w = textView.bounds.size.width;
     CGFloat h = contentSize.height;
-    
-    [self updateAlertActionCellContentViewSize:CGSizeMake(w, h)];
+
+    [self updateAlertActionCellContentViewSize:CGSizeMake(w, h)];    
 }
 
 -(UIView*)_createAlertCustomCellWithActionModel:(YZHAlertActionModel*)actionModel
@@ -884,24 +896,6 @@ typedef void(^YZHUIAlertActionCellContentViewChangeSizeBlock)(YZHUIAlertActionCe
     return self.animateDuration > 0;
 }
 
--(CGFloat)_adjustSheetCellHeightForCell:(YZHUIAlertActionCell*)cell cellSize:(CGSize)cellSize
-{
-    CGPoint point = CGPointMake(0, self.showInView.frame.size.height);
-    CGPoint keyPoint = point;
-    if (self.showInView.superview) {
-        keyPoint = [self.showInView.superview convertPoint:point toView:[UIApplication sharedApplication].keyWindow];
-    }
-    CGFloat cellHeight = cellSize.height;
-    CGFloat diffHeight = keyPoint.y - CGRectGetMaxY(SAFE_FRAME);
-    if (diffHeight > 0) {
-        UIEdgeInsets insets = cell.edgeInsets;
-        insets.bottom += diffHeight;
-        cell.edgeInsets = insets;
-        cellHeight += diffHeight;
-    }
-    return cellHeight;
-}
-
 -(NSMutableArray<UIView*>*)contentSubViews
 {
     if (_contentSubViews == nil) {
@@ -1221,7 +1215,7 @@ typedef void(^YZHUIAlertActionCellContentViewChangeSizeBlock)(YZHUIAlertActionCe
                 [self.contentSubViews addObject:cell];
                 cell.rowIndex = rowIndex;
                 cell.contentViewNMSize = [cell getCellContentFrameForCellSize:CGSizeMake(width, height)].size;
-                if (haveContentViewMaxSize == NO) {
+                if (haveContentViewMaxSize == NO || cell.contentViewMaxSize.height < cell.contentViewNMSize.height) {
                     cell.contentViewMaxSize = cell.contentViewNMSize;
                 }
                 
@@ -1308,6 +1302,41 @@ typedef void(^YZHUIAlertActionCellContentViewChangeSizeBlock)(YZHUIAlertActionCe
             [self.tipsButton setImage:image forState:UIControlStateNormal];
         }
     }
+}
+
+-(CGFloat)_adjustSheetCellHeightForCell:(YZHUIAlertActionCell*)cell cellSize:(CGSize)cellSize
+{
+    CGPoint point = CGPointMake(0, self.showInView.frame.size.height);
+    if (!CGRectIsEmpty(cell.frame)) {
+        point = CGPointMake(0, CGRectGetMaxY(cell.frame));
+        point = [cell.superview convertPoint:point toView:self.showInView];
+    }
+    
+    return [self _adjustSheetCellHeightForCell:cell cellSize:cellSize maxYPoint:point];
+}
+
+-(CGFloat)_adjustSheetCellHeightForCell:(YZHUIAlertActionCell*)cell cellSize:(CGSize)cellSize maxYPoint:(CGPoint)point
+{
+    if (UIEdgeInsetsEqualToEdgeInsets(SAFE_INSETS, UIEdgeInsetsZero)) {
+        return cellSize.height;
+    }
+    if (self.showInView.superview) {
+        point = [self.showInView.superview convertPoint:point toView:[UIApplication sharedApplication].keyWindow];
+    }
+    CGFloat cellHeight = cellSize.height;
+    CGFloat diffHeight = point.y - CGRectGetMaxY(SAFE_FRAME);
+    if (diffHeight > 0) {
+        UIEdgeInsets insets = cell.edgeInsets;
+        insets.bottom += diffHeight;
+        cell.edgeInsets = insets;
+        cellHeight += diffHeight;
+    }
+    else {
+        UIEdgeInsets insets = cell.edgeInsets;
+        insets.bottom = insets.top;
+        cell.edgeInsets = insets;
+    }
+    return cellHeight;
 }
 
 -(YZHAlertActionModel*)sheetCancelModel
@@ -1463,7 +1492,7 @@ typedef void(^YZHUIAlertActionCellContentViewChangeSizeBlock)(YZHUIAlertActionCe
     }
     __block BOOL haveEditStyleAction = NO;
     [self.actionModels enumerateObjectsUsingBlock:^(YZHAlertActionModel * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if (obj.actionStyle == YZHUIAlertActionStyleTextEdit) {
+        if (YZHUIALERT_ACTION_STYLE_IS_EDIT(obj.actionStyle)) {
             haveEditStyleAction = YES;
             *stop = YES;
         }
@@ -1509,7 +1538,7 @@ typedef void(^YZHUIAlertActionCellContentViewChangeSizeBlock)(YZHUIAlertActionCe
         if (self.alertViewStyle == YZHUIAlertViewStyleAlertInfo && self.delayDismissInterval > 0) {
             [self performSelector:@selector(dismiss) withObject:nil afterDelay:self.delayDismissInterval];
         }
-        [self registerNotification:YES];
+        [self _registerNotification:YES];
         if (self.didShowBlock) {
             self.didShowBlock(self);
         }
@@ -1734,6 +1763,51 @@ typedef void(^YZHUIAlertActionCellContentViewChangeSizeBlock)(YZHUIAlertActionCe
     [cell updateAlertActionCellContentViewSize:contentSize];
 }
 
+-(void)_registerNotification:(BOOL)regist
+{
+    if (regist) {
+        self.keyboardManager = [[NSKeyboardManager alloc] init];
+        self.keyboardManager.relatedShiftView = self;
+        self.keyboardManager.firstResponderView = self;
+        self.keyboardManager.keyboardTopToResponder = 5;
+        
+        if (YZHUIALERT_VIEW_STYLE_IS_SHEET(self.alertViewStyle)) {
+            WEAK_SELF(weakSelf);
+            self.keyboardManager.willShowBlock = ^(NSKeyboardManager *keyboardManager, NSNotification *keyboardNotification) {
+                [weakSelf _adjustSheetLastCellWithKeyboardNotification:keyboardNotification];
+            };
+            self.keyboardManager.willHideBlock = ^(NSKeyboardManager *keyboardManager, NSNotification *keyboardNotification) {
+                [weakSelf _adjustSheetLastCellWithKeyboardNotification:keyboardNotification];
+            };
+
+        }
+    }
+    else
+    {
+        self.keyboardManager.relatedShiftView = nil;
+        self.keyboardManager.firstResponderView = nil;
+        self.keyboardManager = nil;
+    }
+}
+
+-(void)_adjustSheetLastCellWithKeyboardNotification:(NSNotification*)notification
+{
+    YZHAlertActionModel *actionModel = [self.actionModels lastObject];
+    YZHUIAlertActionCell *cell = [self _alertActionCellForActionModel:actionModel cellIndex:-1];
+    CGSize cellSize = cell.bounds.size;
+    CGFloat maxY = 0;
+    if ([notification.name isEqualToString:UIKeyboardWillShowNotification]) {
+        CGRect frame = [[notification.userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+        maxY = frame.size.height + self.keyboardManager.keyboardTopToResponder;
+    }
+    else if ([notification.name isEqualToString:UIKeyboardWillHideNotification]) {
+        maxY = self.showInView.bounds.size.height;
+    }
+    [self _adjustSheetCellHeightForCell:cell cellSize:cellSize maxYPoint:CGPointMake(0, maxY)];
+    CGSize contentSize = [cell getCellContentFrameForCellSize:cell.bounds.size].size;
+    [self updateAlertActionCellForActionModel:actionModel contentSize:contentSize];
+}
+
 +(NSArray<YZHUIAlertView*>*)alertViewsForTag:(NSInteger)tag inView:(UIView*)inView
 {
     if (inView == nil) {
@@ -1753,26 +1827,10 @@ typedef void(^YZHUIAlertActionCellContentViewChangeSizeBlock)(YZHUIAlertActionCe
     return [[self class] alertViewsForTag:tag inView:inView].count;
 }
 
--(void)registerNotification:(BOOL)regist
-{
-    if (regist) {
-        self.keyboardManager = [[NSKeyboardManager alloc] init];
-        self.keyboardManager.relatedShiftView = self;
-        self.keyboardManager.firstResponderView = self;
-        self.keyboardManager.keyboardTopToResponder = 5;
-    }
-    else
-    {
-        self.keyboardManager.relatedShiftView = nil;
-        self.keyboardManager.firstResponderView = nil;
-        self.keyboardManager = nil;
-    }
-}
-
 -(void)dealloc
 {
     NSLog(@"YZHUIAlertView-----------dealloc");
-    [self registerNotification:NO];
+    [self _registerNotification:NO];
 }
 
 #pragma mark override
