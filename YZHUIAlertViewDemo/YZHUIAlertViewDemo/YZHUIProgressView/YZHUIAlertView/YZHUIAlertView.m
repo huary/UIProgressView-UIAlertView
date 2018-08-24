@@ -7,7 +7,6 @@
 //
 
 #import "YZHUIAlertView.h"
-#import "NSKeyboardManager.h"
 #import "YZHUIButton.h"
 #import <objc/runtime.h>
 
@@ -611,7 +610,7 @@ typedef void(^YZHUIAlertActionCellContentViewChangeSizeBlock)(YZHUIAlertActionCe
 
 @property (nonatomic, assign) BOOL isCreate;
 
-@property (nonatomic, strong) NSKeyboardManager *keyboardManager;
+//@property (nonatomic, strong) NSKeyboardManager *keyboardManager;
 
 /* <#注释#> */
 @property (nonatomic, strong) NSMutableArray<UIView*> *contentSubViews;
@@ -637,6 +636,7 @@ typedef void(^YZHUIAlertActionCellContentViewChangeSizeBlock)(YZHUIAlertActionCe
         self.alertViewStyle = alertViewStyle;
         [self _setupDefaultValue];
         [self _setupChildView];
+        [self _registerNotification:YES];
     }
     return self;
 }
@@ -1538,7 +1538,7 @@ typedef void(^YZHUIAlertActionCellContentViewChangeSizeBlock)(YZHUIAlertActionCe
         if (self.alertViewStyle == YZHUIAlertViewStyleAlertInfo && self.delayDismissInterval > 0) {
             [self performSelector:@selector(dismiss) withObject:nil afterDelay:self.delayDismissInterval];
         }
-        [self _registerNotification:YES];
+//        [self _registerNotification:YES];
         if (self.didShowBlock) {
             self.didShowBlock(self);
         }
@@ -1766,7 +1766,7 @@ typedef void(^YZHUIAlertActionCellContentViewChangeSizeBlock)(YZHUIAlertActionCe
 -(void)_registerNotification:(BOOL)regist
 {
     if (regist) {
-        self.keyboardManager = [[NSKeyboardManager alloc] init];
+        _keyboardManager = [[NSKeyboardManager alloc] init];
         self.keyboardManager.relatedShiftView = self;
         self.keyboardManager.firstResponderView = self;
         self.keyboardManager.keyboardTopToResponder = 5;
@@ -1786,7 +1786,7 @@ typedef void(^YZHUIAlertActionCellContentViewChangeSizeBlock)(YZHUIAlertActionCe
     {
         self.keyboardManager.relatedShiftView = nil;
         self.keyboardManager.firstResponderView = nil;
-        self.keyboardManager = nil;
+        _keyboardManager = nil;
     }
 }
 
