@@ -272,14 +272,14 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
         if (contentSize.height > 0) {
             heightRatio = self.customContentSize.height / contentSize.height;
         }
-        titleRectTmp.size.width = titleRectTmp.size.width * heightRatio;
+        titleRectTmp.size.width = self.customContentSize.width;
         titleRectTmp.size.height = titleRectTmp.size.height * heightRatio;
-        titleRectTmp.origin.x = (self.customContentSize.width - titleRectTmp.size.width)/2;
+        titleRectTmp.origin.x = 0;
         titleRectTmp.origin.y = titleRectTmp.origin.y * heightRatio;
         
-        imageViewRectTmp.size.width = imageViewRectTmp.size.width * heightRatio;
+        imageViewRectTmp.size.width = self.customContentSize.width;
         imageViewRectTmp.size.height = imageViewRectTmp.size.height * heightRatio;
-        imageViewRectTmp.origin.x = (self.customContentSize.width - imageViewRectTmp.size.width)/2;
+        imageViewRectTmp.origin.x = 0;
         imageViewRectTmp.origin.y = imageViewRectTmp.origin.y * heightRatio;
         
         if (imageViewRect) {
@@ -485,11 +485,7 @@ static YZHUIProgressView *_shareProgressView_s = NULL;
 
 -(void)removeFromSuperview
 {
-    if (self.customView) {
-        [self.customView removeFromSuperview];
-        self.customView = nil;
-    }
-    [self _dismissAction];
+    [self dismiss];
     [super removeFromSuperview];
 }
 
